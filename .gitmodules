@@ -1,0 +1,3 @@
+[submodule "pure-single"]
+	path = pure-single
+	url = git@github.com:PurePelicanTheme/pure-single.git

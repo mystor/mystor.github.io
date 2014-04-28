@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mystor's Box, Code & stuff">
+
+        <link rel="alternate"  href="/feeds/all.atom.xml" type="application/atom+xml" title="Mystor's Box Full Atom Feed"/>
+
+        <title>ClojureScript + Meteor // Mystor's Box // Code & stuff</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+    <div class="pure-g-r" id="layout">
+        <div class="sidebar pure-u">
+            <div class="cover-img" style="background-image: url('/images/michael.png')">
+                <div class="cover-body">
+                    <header class="header">
+                        <hgroup>
+                            <h1 class="brand-main"><a href="/">Mystor's Box</a></h1>
+                            <p class="tagline">Code & stuff</p>
+                                <p class="social">
+                                    <a href="https://github.com/mystor">
+                                        <i class="fa fa-github fa-3x"></i>
+                                    </a>
+                                <p>
+                        </hgroup>
+                    </header>
+                </div>
+            </div>
+        </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>ClojureScript + Meteor</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="/tag/meteor.html">meteor</a>
+                                <a class="post-category" href="/tag/clojure.html">clojure</a>
+                                <a class="post-category" href="/tag/clojurescript.html">clojurescript</a>
+                                <a class="post-category" href="/tag/integration.html">integration</a>
+                        </p>
+                </header>
+            </section>
+            <p>A few weeks ago, I released a plugin for Meteor, <a href="https://github.com/mystor/meteor-clojurescript">meteor-clojurescript</a>. The goal of this plugin was to make developing with Meteor in ClojureScript as easy as with any of the other languages which Meteor supports. The plugin certainly isn't at that state yet, but it's getting closer.</p>
+<p>Meteor has a build system which it uses for compiling and aggregating files.  Whenever a file changes, it walks the project's directory structure, calling package-provided callbacks for each file with a specific extension it finds.  This callback can then add raw css and javascript assets to the project, which will be compiled and served.</p>
+<p>This system works very well with compile-to-js languages like CoffeeScript, as they map one source file to one javascript output file. Working with languages with more complicated relationships (such as less files), has always been a bit of a pain point in Meteor (all @imported less files have to be given the extension <code>.lessimport</code>, as every file with the extension <code>.less</code> is compiled seperately).  </p>
+<p>Choosing the leiningen <code>project.clj</code> file which accompanies most ClojureScript projects as the base file to compile, it is possible to fire <code>lein cljsbuild once</code> every time a file changes, which will cause the clojurescript to be compiled into a file (presumably in an ignored directory), which is then read and provided to Meteor. Unfortunately, this is unacceptably slow. Every time <code>lein cljsbuild once</code> is called, the JVM has to start up (twice), Clojure has to bootstrap itself, the ClojureScript compiler needs to initialize, the directory structure must be analyzed, and every file must be compiled, then the Google Closure compiler must be run to merge the inputs. On my computer, this would consistently take ~ 60 seconds on a small test project.</p>
+<p>That was unacceptable. Fortunately, the problem of faster compile times had already been, at least partially, solved. The command <code>lein cljsbuild auto</code> would start the JVM and initialize the ClojureScript compiler, and then watch the directory structure for changes.  Whenever something changed, it would recompile (only the differences), and produce a new output file. Using <code>lein cljsbuild auto</code>, compilations often only a few seconds (after the initial startup and first compile).</p>
+<p>By configuring leiningen to output the compiled code into a folder watched by Meteor, we could then cause the Meteor asset pipeline to re-run whenever the ClojureScript code was changed. </p>
+<p>However, simply dropping the JS code into the directory structure would be a bad idea, as source maps would not be correctly handled by Meteor, which would make development with ClojureScript much more difficult. In addition, the code generated by the <code>:nodejs</code> target includes <code>require()</code> calls, and a shebang at the top of the file, which would cause an error if passed into Meteor.</p>
+<p>To solve this problem, the code outputted by leiningen was given a <code>.cjs</code> extension, and the sourcemap was outputted into the same directory. A Meteor extension handler was then created for the <code>.cjs</code> extension, which would both load the source map, and perform the transformations on the code generated by the <code>:nodejs</code> target.</p>
+<p>The leiningen subprocess was also started when the compiler plugin was loaded, and run in the background, such that a seperate leiningen process would not have to be started for development.</p>
+<p>This works fairly well, and you can use it today (just <code>mrt add clojurescript</code>), however it has a few problems:
+ - Meteor Smart Packages are completely unsupported, every top level project has exactly one ClojureScript compile target, and it is defined by the <code>project.clj</code> file in the root of the project. This isn't as big of a problem (due to the package system already avaliable through leiningen for ClojureScript), and it does make sense to not have multiple copies of the ClojureScript/Closure core libraries.
+ - Explicit control over which files are compiled is needed, rather than the implicit mechanism which is generally used by Meteor, meaning that ClojureScript doesn't feel as much like it is part of the Meteor ecosystem
+ - Advanced compilation is not yet fully supported, as an externs file for Meteor hasn't been made, so any calls to the Meteor APIs will be munged
+ - The compiler creates intermediate files on the disk within the project directory</p>
+<p>However, the potential in using Meteor's powerful reactivity API with the expressive power of ClojureScript is great. I can only see the plugin getting better as I gain familiarity with ClojureScript and the Meteor plugin system. For example, I have done some initial work on a hiccup-style templating interface for meteor-clojurescript, and it is turning out quite well.</p>
+            <a href="#" class="go-top">Go Top</a>
+<footer class="footer">
+    <p>&copy; Michael Layzell &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure-single">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+</footer>        </div>
+    </div>
+    </div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+
+</body>
+</html>
