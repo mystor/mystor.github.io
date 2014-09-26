@@ -6,7 +6,8 @@ AUTHOR = u'Michael Layzell'
 SITENAME = u'Mystor\'s Box'
 SITEURL = ''
 TAGLINE = 'Code & stuff'
-COVER_IMG_URL = '/images/michael.png'
+# COVER_IMG_URL = '/images/squidhat.png'
+PROFILE_IMG_URL = '/images/squidhat.png'
 
 TIMEZONE = 'Europe/Paris'
 
@@ -21,7 +22,9 @@ TRANSLATION_FEED_ATOM = None
 LINKS =  (('GitHub Release Watch', 'http://gh-release-watch.com'),)
 
 # Social widget
-SOCIAL = (('github', 'https://github.com/mystor'),)
+SOCIAL = (('inbox', 'mailto:michael@thelayzells.com'),
+          ('github', 'https://github.com/mystor'),
+          ('twitter', 'https://twitter.com/mistron'),)
 
 DEFAULT_PAGINATION = False
 
