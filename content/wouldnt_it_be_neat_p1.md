@@ -106,23 +106,23 @@ have been generated similar to the following:
 #include <cstdint>
 
 /* the rs:: namespace contains rust-defined types */
-namespace rs {{
+namespace rs {
     /* A slice from rust code */
     /* Can be used to interact with, pass around, and return Rust slices */
     template<class T>
-    struct Slice {{
+    struct Slice {
         const T*  data;
         uintptr_t len;
-    }};
+    };
 
     /* A string slice is simply a slice of utf-8 encoded characters */
     typedef Slice<uint8_t> StrSlice;
 
     /* A trait object is composed of a data pointer and a vtable */
-    struct TraitObject {{
+    struct TraitObject {
         void* data;
         void* vtable;
-    }};
+    };
 
     /* A dummy struct which is generated when incompatible types are closed-over */
     struct __Dummy;
@@ -133,13 +133,13 @@ namespace rs {{
     typedef uint16_t u16;
     typedef uint32_t u32;
     typedef uint64_t u64;
-    typedef {} usize;
+    typedef uint64_t usize;
 
     typedef int8_t i8;
     typedef int16_t i16;
     typedef int32_t i32;
     typedef int64_t i64;
-    typedef {} isize;
+    typedef int64_t isize;
 
     typedef float f32;
     static_assert(sizeof(f32) == 4, "C++ `float` isn't 32 bits wide");
@@ -149,7 +149,7 @@ namespace rs {{
 
     /* We use this bool type to ensure that our bools are 1 byte wide */
     typedef i8 bool_;
-}}
+}
 
 /* User-generated function declarations */
 extern "C" {
