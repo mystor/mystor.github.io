@@ -149,23 +149,23 @@ have been generated similar to the following:</p>
 <span class="cp">#include</span> <span class="cpf">&lt;cstdint&gt;</span><span class="cp"></span>
 
 <span class="cm">/* the rs:: namespace contains rust-defined types */</span>
-<span class="k">namespace</span> <span class="n">rs</span> <span class="p">{{</span>
+<span class="k">namespace</span> <span class="n">rs</span> <span class="p">{</span>
     <span class="cm">/* A slice from rust code */</span>
     <span class="cm">/* Can be used to interact with, pass around, and return Rust slices */</span>
     <span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
-    <span class="k">struct</span> <span class="n">Slice</span> <span class="p">{{</span>
+    <span class="k">struct</span> <span class="n">Slice</span> <span class="p">{</span>
         <span class="k">const</span> <span class="n">T</span><span class="o">*</span>  <span class="n">data</span><span class="p">;</span>
         <span class="kt">uintptr_t</span> <span class="n">len</span><span class="p">;</span>
-    <span class="p">}};</span>
+    <span class="p">};</span>
 
     <span class="cm">/* A string slice is simply a slice of utf-8 encoded characters */</span>
     <span class="k">typedef</span> <span class="n">Slice</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span> <span class="n">StrSlice</span><span class="p">;</span>
 
     <span class="cm">/* A trait object is composed of a data pointer and a vtable */</span>
-    <span class="k">struct</span> <span class="n">TraitObject</span> <span class="p">{{</span>
+    <span class="k">struct</span> <span class="n">TraitObject</span> <span class="p">{</span>
         <span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">;</span>
         <span class="kt">void</span><span class="o">*</span> <span class="n">vtable</span><span class="p">;</span>
-    <span class="p">}};</span>
+    <span class="p">};</span>
 
     <span class="cm">/* A dummy struct which is generated when incompatible types are closed-over */</span>
     <span class="k">struct</span> <span class="n">__Dummy</span><span class="p">;</span>
@@ -176,13 +176,13 @@ have been generated similar to the following:</p>
     <span class="k">typedef</span> <span class="kt">uint16_t</span> <span class="n">u16</span><span class="p">;</span>
     <span class="k">typedef</span> <span class="kt">uint32_t</span> <span class="n">u32</span><span class="p">;</span>
     <span class="k">typedef</span> <span class="kt">uint64_t</span> <span class="n">u64</span><span class="p">;</span>
-    <span class="k">typedef</span> <span class="p">{}</span> <span class="n">usize</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="kt">uint64_t</span> <span class="n">usize</span><span class="p">;</span>
 
     <span class="k">typedef</span> <span class="kt">int8_t</span> <span class="n">i8</span><span class="p">;</span>
     <span class="k">typedef</span> <span class="kt">int16_t</span> <span class="n">i16</span><span class="p">;</span>
     <span class="k">typedef</span> <span class="kt">int32_t</span> <span class="n">i32</span><span class="p">;</span>
     <span class="k">typedef</span> <span class="kt">int64_t</span> <span class="n">i64</span><span class="p">;</span>
-    <span class="k">typedef</span> <span class="p">{}</span> <span class="n">isize</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="kt">int64_t</span> <span class="n">isize</span><span class="p">;</span>
 
     <span class="k">typedef</span> <span class="kt">float</span> <span class="n">f32</span><span class="p">;</span>
     <span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">f32</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="s">&quot;C++ `float` isn&#39;t 32 bits wide&quot;</span><span class="p">);</span>
@@ -192,7 +192,7 @@ have been generated similar to the following:</p>
 
     <span class="cm">/* We use this bool type to ensure that our bools are 1 byte wide */</span>
     <span class="k">typedef</span> <span class="n">i8</span> <span class="n">bool_</span><span class="p">;</span>
-<span class="p">}}</span>
+<span class="p">}</span>
 
 <span class="cm">/* User-generated function declarations */</span>
 <span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="p">{</span>
