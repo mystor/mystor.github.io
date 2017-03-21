@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mystor's Box, Software Engineer at Mozilla.<br>I work on random stuff in C++ and Rust.">
+
+        <link rel="alternate"  href="/feeds/all.atom.xml" type="application/atom+xml" title="Mystor's Box Full Atom Feed"/>
+
+        <title>"Wouldn't it be neat if you could write C++ inline in Rust?" // Mystor's Box // Software Engineer at Mozilla.<br>I work on random stuff in C++ and Rust.</title>
+
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+    <div class="pure-g-r" id="layout">
+        <div class="sidebar pure-u">
+            <div class="cover-img" style="background: none repeat scroll 0% 0% #3D4F5D">
+                <div class="cover-body">
+                    <header class="header">
+                        <hgroup>
+                            <img class="avatar" src="/images/squidhat.png">
+                            <h1 class="brand-main"><a href="">Mystor's Box</a></h1>
+                            <p class="tagline">Software Engineer at Mozilla.<br>I work on random stuff in C++ and Rust.</p>
+                                <p class="social">
+                                    <a href="mailto:michael@thelayzells.com">
+                                        <i class="fa fa-inbox fa-3x"></i>
+                                    </a>
+                                    <a href="https://github.com/mystor">
+                                        <i class="fa fa-github fa-3x"></i>
+                                    </a>
+                                    <a href="https://twitter.com/layzellm">
+                                        <i class="fa fa-twitter fa-3x"></i>
+                                    </a>
+                                </p>
+                        </hgroup>
+                    </header>
+                </div>
+            </div>
+        </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>"Wouldn't it be neat if you could write C++ inline in Rust?"</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="/tag/rust.html">rust</a>
+                                <a class="post-category" href="/tag/rust-cpp.html">rust-cpp</a>
+                                <a class="post-category" href="/tag/c.html">c++</a>
+                                <a class="post-category" href="/tag/ffi.html">ffi</a>
+                        </p>
+                </header>
+            </section>
+            <p>In June of 2015, I had an idea. At the time, I was obsessed with compilers, and
+what was possible to do at compile time. For one of the languages which I was
+working on, I got excited by the idea that I could have flawless C++ interop by
+embedding all of <a href="https://clang.llvm.org">clang</a> inside of the compiler, and
+have a special <code>c++ {}</code> form which would allow you to directly write C++ code
+inside the program, and give that code access to the stack variables currently
+in scope.</p>
+<p>That language never came into fruition, but at the time I was also interested in
+another language, which I was going to use to implement my
+language, <a href="https://rust-lang.org">Rust</a>. Rust was very interesting to me,
+because in 2014 it had been one of the first times I had ever written
+"system-level" code. I loved the way it seemed to make everything possible with
+apparently no overhead. However, I had run into some problems. I wanted to
+use <a href="https://llvm.org">LLVM</a> to implement the compiler back-end for the language
+I was working on, but the best LLVM bindings were written in C++, and using them
+from Rust was a tedious experience, to say the least. No good LLVM bindings were
+available yet for Rust, so I would pretty much have to write them myself.</p>
+<p>I, naturally, started wishing that I had the <code>c++ {}</code> block feature in Rust, to
+help me write my new programming language. I really enjoy abusing meta
+programming features in languages to let me do things which their creators never
+intended, so I started concocting ideas as to how I could implement this using
+Rust's unstable plugin infrastructure.</p>
+<p>Thus, <a href="https://github.com/mystor/rust-cpp">rust-cpp</a> was born.</p>
+<p>You can still find the code for this original version of rust-cpp, although
+you'll have trouble getting it to build, archived under
+the
+<a href="https://github.com/mystor/rust-cpp/tree/legacy_macros1.1_v0"><code>legacy_rustc_plugin</code></a> branch.</p>
+<p>This initial version of rust-cpp was built with 2 parts, and remains possibly
+the most powerful version of rust-cpp to this day. Firstly, it contained a
+procedural macro, <code>cpp!</code>, which would perform the Rust codegen, and store
+the information parsed in some global state, and then a lint pass, which would
+discover the type information for the callsites, and actually generate and compile
+the C++ code.</p>
+<p>An example use of this API might look like:</p>
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">a</span>: <span class="kt">i32</span> <span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">b</span>: <span class="kt">i32</span> <span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w"></span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">cpp_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cpp</span><span class="o">!</span><span class="p">((</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">i32</span> <span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">int32_t</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">int32_t</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">d</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">})</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+
+
+<p>This invocation would "capture" the local variables <code>a</code> and <code>b</code> in the <code>cpp!</code>
+closure, exposing those variable names to the C++ code. the closure itself then
+would return a <code>i32</code>. The C++ code would be contained with a function
+invocation, such that the interface looks correct.</p>
+<p>The <code>cpp!</code> macro expansion would produce some code which would look something
+like the following:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[link(name = </span><span class="s">&quot;rust_cpp_tmp&quot;</span><span class="cp">, kind = </span><span class="s">&quot;static&quot;</span><span class="cp">)]</span><span class="w"></span>
+<span class="w">    </span><span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">fn</span> <span class="nf">rust_cpp_936DA01F9ABD4d9d80C702AF85C822A8</span><span class="p">(</span><span class="n">a</span>: <span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>: <span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="kt">u8</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">i32</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">rust_cpp_936DA01F9ABD4d9d80C702AF85C822A8</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="kt">u8</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+<p>It would then also record the information parsed from the declaration (the names
+of the arguments, the body text extracted from the original span as a string,
+etc.) in the global storage.</p>
+<p>Then, the lint pass would run. It would walk the typechecked AST, looking at
+every function call. If the function call begain with the name <code>rust_cpp_</code>, it
+would be considered as a <code>rust-cpp</code> call. The matching function would be looked
+up from global storage.</p>
+<p>We would then look at the pre-casting types of <code>a</code> and <code>b</code>, and try to guess the
+C++ type from them. If we failed, we would default to passing an opaque type to
+C++.</p>
+<p>Once the lint pass had seen every function call which was generated earlier by
+the <code>cpp!</code> procedural macro, it would write out a <code>rust_cpp_tmp.cpp</code> file, which
+would then be shelled out to the native c++ compiler. The above function would
+have been generated similar to the following:</p>
+<div class="highlight"><pre><span></span><span class="cm">/******************************</span>
+<span class="cm"> * Code Generated by Rust-C++ *</span>
+<span class="cm"> ******************************/</span>
+
+<span class="cm">/* cstdint includes sane type definitions for integer types */</span>
+<span class="cp">#include</span> <span class="cpf">&lt;cstdint&gt;</span><span class="cp"></span>
+
+<span class="cm">/* the rs:: namespace contains rust-defined types */</span>
+<span class="k">namespace</span> <span class="n">rs</span> <span class="p">{{</span>
+    <span class="cm">/* A slice from rust code */</span>
+    <span class="cm">/* Can be used to interact with, pass around, and return Rust slices */</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span>
+    <span class="k">struct</span> <span class="n">Slice</span> <span class="p">{{</span>
+        <span class="k">const</span> <span class="n">T</span><span class="o">*</span>  <span class="n">data</span><span class="p">;</span>
+        <span class="kt">uintptr_t</span> <span class="n">len</span><span class="p">;</span>
+    <span class="p">}};</span>
+
+    <span class="cm">/* A string slice is simply a slice of utf-8 encoded characters */</span>
+    <span class="k">typedef</span> <span class="n">Slice</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span> <span class="n">StrSlice</span><span class="p">;</span>
+
+    <span class="cm">/* A trait object is composed of a data pointer and a vtable */</span>
+    <span class="k">struct</span> <span class="n">TraitObject</span> <span class="p">{{</span>
+        <span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">;</span>
+        <span class="kt">void</span><span class="o">*</span> <span class="n">vtable</span><span class="p">;</span>
+    <span class="p">}};</span>
+
+    <span class="cm">/* A dummy struct which is generated when incompatible types are closed-over */</span>
+    <span class="k">struct</span> <span class="n">__Dummy</span><span class="p">;</span>
+
+
+    <span class="cm">/* Typedefs for integral and floating point types */</span>
+    <span class="k">typedef</span> <span class="kt">uint8_t</span> <span class="n">u8</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="kt">uint16_t</span> <span class="n">u16</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="kt">uint32_t</span> <span class="n">u32</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="kt">uint64_t</span> <span class="n">u64</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="p">{}</span> <span class="n">usize</span><span class="p">;</span>
+
+    <span class="k">typedef</span> <span class="kt">int8_t</span> <span class="n">i8</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="kt">int16_t</span> <span class="n">i16</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="kt">int32_t</span> <span class="n">i32</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="kt">int64_t</span> <span class="n">i64</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="p">{}</span> <span class="n">isize</span><span class="p">;</span>
+
+    <span class="k">typedef</span> <span class="kt">float</span> <span class="n">f32</span><span class="p">;</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">f32</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="s">&quot;C++ `float` isn&#39;t 32 bits wide&quot;</span><span class="p">);</span>
+
+    <span class="k">typedef</span> <span class="kt">double</span> <span class="n">f64</span><span class="p">;</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">f64</span><span class="p">)</span> <span class="o">==</span> <span class="mi">8</span><span class="p">,</span> <span class="s">&quot;C++ `double` isn&#39;t 64 bits wide&quot;</span><span class="p">);</span>
+
+    <span class="cm">/* We use this bool type to ensure that our bools are 1 byte wide */</span>
+    <span class="k">typedef</span> <span class="n">i8</span> <span class="n">bool_</span><span class="p">;</span>
+<span class="p">}}</span>
+
+<span class="cm">/* User-generated function declarations */</span>
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="p">{</span>
+
+<span class="o">::</span><span class="n">rs</span><span class="o">::</span><span class="n">i32</span> <span class="n">rust_cpp_936DA01F9ABD4d9d80C702AF85C822A8</span><span class="p">(</span><span class="k">const</span> <span class="o">::</span><span class="n">rs</span><span class="o">::</span><span class="n">i32</span><span class="o">&amp;</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="o">::</span><span class="n">rs</span><span class="o">::</span><span class="n">i32</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int32_t</span> <span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="mi">10</span><span class="p">;</span>
+    <span class="kt">int32_t</span> <span class="n">d</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="mi">20</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">c</span> <span class="o">+</span> <span class="n">d</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">}</span>
+</pre></div>
+
+
+<p>The code would then use an
+<a href="https://github.com/mystor/rust-cpp/blob/legacy_rustc_plugin/src/lint.rs#L206-L221">ugly hack</a> to
+insert the compiled static library into the <code>SearchPaths</code> object, causing it to
+be linked in when the compiler performs the final link step.</p>
+<p>This plugin was pretty cool. It could allow you to embed arbitrary C++ code into
+your Rust code, was fairly easy to add, and inferred a lot of types for you to
+boot! Unfortunately, it required unstable Rust, which meant that people
+definitely couldn't use it, and also meant that I had to push a new version very
+frequently to keep up with bustage.</p>
+<p>Eventually, I decided to rewrite <code>rust-cpp</code>, and shed some of the cool features,
+in persuit of it working on stable Rust, but that's a story for part 2.</p>
+            <a href="#" class="go-top">Go Top</a>
+<footer class="footer">
+    <p>&copy; Michael Layzell &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure-single">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+</footer>        </div>
+    </div>
+    </div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+
+</body>
+</html>
