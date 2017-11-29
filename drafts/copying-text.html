@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nika's Box, Random stuff in C++ and Rust.">
+
+        <link rel="alternate"  href="/feeds/all.atom.xml" type="application/atom+xml" title="Nika's Box Full Atom Feed"/>
+
+        <title>So, you want to copy some data? // Nika's Box // Random stuff in C++ and Rust.</title>
+
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".content").fitVids();
+        });
+    </script>
+</head>
+
+<body>
+    <div class="pure-g-r" id="layout">
+        <div class="sidebar pure-u">
+            <div class="cover-img" style="background: none repeat scroll 0% 0% #3D4F5D">
+                <div class="cover-body">
+                    <header class="header">
+                        <hgroup>
+                            <img class="avatar" src="/images/nika.png">
+                            <h1 class="brand-main"><a href="">Nika's Box</a></h1>
+                            <p class="tagline">Random stuff in C++ and Rust.</p>
+                                <p class="social">
+                                    <a href="mailto:nika@thelayzells.com">
+                                        <i class="fa fa-inbox fa-3x"></i>
+                                    </a>
+                                    <a href="https://github.com/mystor">
+                                        <i class="fa fa-github fa-3x"></i>
+                                    </a>
+                                    <a href="https://twitter.com/kneecaw">
+                                        <i class="fa fa-twitter fa-3x"></i>
+                                    </a>
+                                </p>
+                        </hgroup>
+                    </header>
+                </div>
+            </div>
+        </div>
+    <div class="pure-u">
+        <div class="content">
+            <section class="post">
+                <header class="post-header">
+                    <h1>So, you want to copy some data?</h1>
+                        <p class="post-meta">
+                            // under                                 <a class="post-category" href="/tag/execcommand.html">execcommand</a>
+                                <a class="post-category" href="/tag/web-standards.html">web standards</a>
+                                <a class="post-category" href="/tag/clipboard.html">clipboard</a>
+                        </p>
+                </header>
+            </section>
+            <p>If you want to have a button on your website which allows you to copy text to
+the clipboard by clicking a button, the API which you will use to implement that
+is <code>document.execCommand</code>. This is an old editor API, and because of that has
+its fair share of browser specific quirks, and other issues.</p>
+<p>The most common case for copying text to the clipboard is for copying small
+amounts of text which are already in a textbox on the screen. For example, the
+GitHub copy button would be implemented like this:</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;ex1&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;https://github.com/mystor/mystor.github.io/&quot;</span> <span class="na">readonly</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">button</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;ex1-btn&quot;</span><span class="p">&gt;</span>Copy<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s2">&quot;#ex1-btn&quot;</span><span class="p">).</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;click&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s2">&quot;#ex1&quot;</span><span class="p">).</span><span class="nx">select</span><span class="p">();</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">execCommand</span><span class="p">(</span><span class="s2">&quot;copy&quot;</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<div style="text-align: center;">
+<input type="text" id="ex1" value="https://github.com/mystor/mystor.github.io/" readonly>
+<button id="ex1-btn">Copy</button>
+<script>
+  document.querySelector("#ex1-btn").addEventListener("click", function() {
+    document.querySelector("#ex1").select();
+    document.execCommand("copy");
+  });
+</script>
+</div>
+
+<p>This code selects the text of an existing textbox. For short strings like
+GitHub's URLs, this is a perfectly fine solution. It's simple, portable, and
+selecting a short string like that is really fast.</p>
+<p>However, people also want to use the clipboard for copying around much larger
+amounts of data. For example, some sites provide the ability to export SVGs or
+other large pieces of data to the clipboard. In these cases, adding a text area
+to the DOM dynamically, and selecting it, can be very slow. For example consider
+the following code:</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">button</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;ex2-btn&quot;</span><span class="p">&gt;</span>Copy 8Mb of Data (naive)<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s2">&quot;#ex2-btn&quot;</span><span class="p">).</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;click&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">getData</span><span class="p">();</span>
+
+    <span class="kd">let</span> <span class="nx">textarea</span> <span class="o">=</span> <span class="nx">createAndSelectDummyTextArea</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">execCommand</span><span class="p">(</span><span class="s2">&quot;copy&quot;</span><span class="p">);</span>
+    <span class="nx">textarea</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">removeChild</span><span class="p">(</span><span class="nx">textarea</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<blockquote>
+<p><strong>WARNING</strong> Clicking this button <em>may</em> hang your browser for a couple of seconds. </p>
+<p>In my testing Firefox 57 manages to avoid laying out the textbox if it is
+marked as readonly, as we remove it before the next vsync, but Chrome 62 hangs
+reflowing during text selection.</p>
+</blockquote>
+<div style="text-align: center;">
+<button id="ex2-btn">Copy 8Mb of Data (naive)</button>
+<script>
+  document.querySelector("#ex2-btn").addEventListener("click", function() {
+    var data = getData();
+
+    let textarea = createAndSelectDummyTextArea(data);
+    document.execCommand("copy");
+    textarea.parentNode.removeChild(textarea);
+  });
+</script>
+</div>
+
+<p>On some browsers, the above code triggers a very expensive synchronous reflow
+when selecting the text in the offscreen textarea, which can last for multiple
+seconds. This isn't great for text copying performance. It would be much nicer
+if we could copy text to the clipboard without needing to put it in a textarea!</p>
+<p>This is possible through the use of the <code>copy</code> clipboard event. This event is
+fired on the document when a copy is performed, and is given access to
+a <a href="https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer" title="DataTransfer"><code>DataTransfer</code></a>, which can be used to directly modify the data to be
+copied to the clipboard.</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">button</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;ex3-btn&quot;</span><span class="p">&gt;</span>Copy 8Mb of Data (FF <span class="err">&amp;</span> Chrome)<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s2">&quot;#ex3-btn&quot;</span><span class="p">).</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;click&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">getData</span><span class="p">();</span>
+
+    <span class="kd">function</span> <span class="nx">handler</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">evt</span><span class="p">.</span><span class="nx">clipboardData</span><span class="p">.</span><span class="nx">setData</span><span class="p">(</span><span class="s2">&quot;text/plain&quot;</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+      <span class="nx">evt</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;copy&quot;</span><span class="p">,</span> <span class="nx">handler</span><span class="p">);</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">execCommand</span><span class="p">(</span><span class="s2">&quot;copy&quot;</span><span class="p">);</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="s2">&quot;copy&quot;</span><span class="p">,</span> <span class="nx">handler</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<blockquote>
+<p><strong>NOTE</strong> As of the time of writing this post, this button will only work on
+Firefox and Chrome. We'll make it work on more browsers next.</p>
+</blockquote>
+<div style="text-align: center;">
+<button id="ex3-btn">Copy 8Mb of Data (FF & Chrome)</button>
+<script>
+  document.querySelector("#ex3-btn").addEventListener("click", function() {
+    var data = getData();
+
+    function handler(evt) {
+      evt.clipboardData.setData("text/plain", data);
+      evt.preventDefault();
+    }
+
+    document.addEventListener("copy", handler);
+    document.execCommand("copy");
+    document.removeEventListener("copy", handler);
+  });
+</script>
+</div>
+
+<p>Unfortunately, this will only work on Firefox and Chrome. Internet Explorer,
+Edge, and Safari don't fully implement the standard, and require a valid copy
+selection to perform a <code>document.execCommand("copy")</code>, even if a copy event
+handler is registered, so we can create a small offscreen text box with a
+selection for that purpose. In addition, Internet Explorer doesn't expose
+<code>clipboardData</code> as a member of the event, and requires a non-standard MIME type,
+so we need to handle that too:</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">button</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;ex4-btn&quot;</span><span class="p">&gt;</span>Copy 8Mb of Data (portable)<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s2">&quot;#ex4-btn&quot;</span><span class="p">).</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;click&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">getData</span><span class="p">();</span>
+
+    <span class="kd">function</span> <span class="nx">handler</span><span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">clipboardData</span> <span class="o">!==</span> <span class="s2">&quot;undefined&quot;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">evt</span><span class="p">.</span><span class="nx">clipboardData</span><span class="p">.</span><span class="nx">setData</span><span class="p">(</span><span class="s2">&quot;text/plain&quot;</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// Handle IE&#39;s non-standard clipboardData API.</span>
+        <span class="nx">clipboardData</span><span class="p">.</span><span class="nx">setData</span><span class="p">(</span><span class="s2">&quot;TEXT&quot;</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="nx">evt</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="c1">// The dummy textarea is required for Safari and IE/Edge.</span>
+    <span class="kd">var</span> <span class="nx">textarea</span> <span class="o">=</span> <span class="nx">createAndSelectDummyTextArea</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">);</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">&quot;copy&quot;</span><span class="p">,</span> <span class="nx">handler</span><span class="p">);</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">execCommand</span><span class="p">(</span><span class="s2">&quot;copy&quot;</span><span class="p">);</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="s2">&quot;copy&quot;</span><span class="p">,</span> <span class="nx">handler</span><span class="p">);</span>
+    <span class="nx">textarea</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">removeChild</span><span class="p">(</span><span class="nx">textarea</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<div style="text-align: center;">
+<button id="ex4-btn">Copy 8Mb of Data (portable)</button>
+<script>
+  document.querySelector("#ex4-btn").addEventListener("click", function() {
+    var data = getData();
+
+    function handler(evt) {
+      if (typeof evt.clipboardData !== "undefined") {
+        evt.clipboardData.setData("text/plain", data);
+      } else {
+        // Handle IE's non-standard clipboardData API.
+        clipboardData.setData("TEXT", data);
+      }
+      evt.preventDefault();
+    }
+
+    // The dummy textarea is required for Safari and IE/Edge.
+    var textarea = createAndSelectDummyTextArea("_");
+    document.addEventListener("copy", handler);
+    document.execCommand("copy");
+    document.removeEventListener("copy", handler);
+    textarea.parentNode.removeChild(textarea);
+  });
+</script>
+</div>
+
+<p>Unfortunately popular clipboard libraries like <a href="https://clipboardjs.com/" title="clipboard.js">clipboard.js</a>, are focused
+on the small text copy usecase, and don't do this work for you. If you want a
+small library which just copies text with no fancy features, I've
+written <a href="https://github.com/mystor/raw_copy" title="raw_copy">raw_copy</a>.</p>
+<blockquote>
+<p><strong>NOTE</strong> I have previously submitted a PR to clipboard.js to improve the speed
+of copying large amounts of data (<a href="https://github.com/zenorocha/clipboard.js/pull/412" title="zenorocha/clipboard.js#412">#412</a>), and it was rejected due to the
+additional complexity required to implement this with the clipboard.js API.</p>
+<p>This was a reasonable decision, but it makes the library a poor choice for
+developers who need to copy megabytes of data.</p>
+</blockquote>
+<hr>
+
+<p>The following is the implementation of the helper functions used in the above
+examples - They were factored out to keep the code clear.</p>
+<div class="highlight"><pre><span></span><span class="kd">function</span> <span class="nx">getData</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// 8Mb (2^23 bytes) of &quot;a&quot;s should be enough.</span>
+  <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="s2">&quot;a&quot;</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">23</span><span class="p">;</span> <span class="o">++</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span> <span class="nx">data</span> <span class="o">+=</span> <span class="nx">data</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">data</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">createAndSelectDummyTextArea</span><span class="p">(</span><span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">dummy</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;textarea&quot;</span><span class="p">);</span>
+
+  <span class="c1">// Move the element out of screen horizontally.</span>
+  <span class="nx">dummy</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="s2">&quot;absolute&quot;</span><span class="p">;</span>
+  <span class="nx">dummy</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="s2">&quot;-9999px&quot;</span><span class="p">;</span>
+
+  <span class="c1">// Ensure we don&#39;t have to scroll to select the text.</span>
+  <span class="kd">var</span> <span class="nx">scrolltop</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">pageYOffset</span> <span class="o">||</span> <span class="nb">document</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">;</span>
+  <span class="nx">dummy</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="nx">scrolltop</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">;</span>
+
+  <span class="c1">// On some browsers readonly textboxes are faster.</span>
+  <span class="nx">dummy</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="s2">&quot;readonly&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">);</span>
+
+  <span class="c1">// Add the element to the document.</span>
+  <span class="nx">dummy</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">text</span><span class="p">;</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">dummy</span><span class="p">);</span>
+
+  <span class="c1">// Select the textarea.</span>
+  <span class="nx">dummy</span><span class="p">.</span><span class="nx">select</span><span class="p">();</span>
+
+  <span class="k">return</span> <span class="nx">dummy</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<script>
+  function getData() {
+    // 8Mb (2^23 bytes) of "a"s should be enough.
+    var data = "a";
+    for (var i = 0; i < 23; ++i) { data += data; }
+    return data;
+  }
+
+  function createAndSelectDummyTextArea(text) {
+    var dummy = document.createElement("textarea");
+
+    // Move the element out of screen horizontally.
+    dummy.style.position = "absolute";
+    dummy.style.left = "-9999px";
+
+    // Ensure we don't have to scroll to select the text.
+    var scrolltop = window.pageYOffset || document.documentElement.scrollTop;
+    dummy.style.top = scrolltop + "px";
+
+    // On some browsers readonly textboxes are faster.
+    dummy.setAttribute("readonly", "");
+
+    // Add the element to the document.
+    dummy.value = text;
+    document.body.appendChild(dummy);
+
+    // Select the textarea.
+    dummy.select();
+
+    return dummy;
+  }
+</script>
+            <a href="#" class="go-top">Go Top</a>
+<footer class="footer">
+    <p>&copy; Nika Layzell &ndash;
+        Built with <a href="https://github.com/PurePelicanTheme/pure-single">Pure Theme</a>
+        for <a href="http://blog.getpelican.com/">Pelican</a>
+    </p>
+</footer>        </div>
+    </div>
+    </div>
+    <script>
+        var $top = $('.go-top');
+
+        // Show or hide the sticky footer button
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 200) {
+                $top.fadeIn(200);
+            } else {
+                $top.fadeOut(200);
+            }
+        });
+
+        // Animate the scroll to top
+        $top.click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({scrollTop: 0}, 300);
+        })
+
+        // Makes sure that the href="#" attached to the <a> elements
+        // don't scroll you back up the page.
+        $('body').on('click', 'a[href="#"]', function(event) {
+            event.preventDefault();
+        });
+    </script>
+
+</body>
+</html>
