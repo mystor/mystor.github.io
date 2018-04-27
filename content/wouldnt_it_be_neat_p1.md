@@ -4,7 +4,7 @@ Modified: 2017-03-20 7:17
 Category: Programming
 Tags: rust, rust-cpp, c++, ffi
 Slug: wouldnt-it-be-neat-p1
-Authors: Michael Layzell
+Authors: Nika Layzell
 
 In June of 2015, I had an idea. At the time, I was obsessed with compilers, and
 what was possible to do at compile time. For one of the languages which I was

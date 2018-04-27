@@ -4,7 +4,7 @@ Modified: 2014-04-27 8:14
 Category: Programming
 Tags: meteor, clojure, clojurescript, integration
 Slug: clojurescript-meteor
-Authors: Michael Layzell
+Authors: Nika Layzell
 
 A few weeks ago, I released a plugin for Meteor, [meteor-clojurescript](https://github.com/mystor/meteor-clojurescript). The goal of this plugin was to make developing with Meteor in ClojureScript as easy as with any of the other languages which Meteor supports. The plugin certainly isn't at that state yet, but it's getting closer.
 

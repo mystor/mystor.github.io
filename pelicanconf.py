@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
 
-AUTHOR = u'Michael Layzell'
-SITENAME = u'Mystor\'s Box'
+AUTHOR = u'Nika Layzell'
+SITENAME = u'Nika\'s Box'
 SITEURL = 'https://mystor.github.io'
-TAGLINE = 'Software Engineer at Mozilla.<br>I work on random stuff in C++ and Rust.'
-# COVER_IMG_URL = '/images/squidhat.png'
-PROFILE_IMG_URL = '/images/squidhat.png'
+TAGLINE = 'Random stuff in C++ and Rust.'
+PROFILE_IMG_URL = '/images/nika.png'
 
 TIMEZONE = 'America/Toronto'
 
@@ -22,9 +21,9 @@ TRANSLATION_FEED_ATOM = None
 LINKS =  ()
 
 # Social widget
-SOCIAL = (('inbox', 'mailto:michael@thelayzells.com'),
+SOCIAL = (('inbox', 'mailto:nika@thelayzells.com'),
           ('github', 'https://github.com/mystor'),
-          ('twitter', 'https://twitter.com/layzellm'),)
+          ('twitter', 'https://twitter.com/kneecaw'),)
 
 DEFAULT_PAGINATION = False
 
