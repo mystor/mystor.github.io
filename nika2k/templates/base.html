@@ -31,17 +31,13 @@
     {% block head_js %}{% endblock %}
 </head>
 
-{% macro prompt(cmd) %}
-    <h1 class="content-subhead">
-        <a class="post-category" href="{{ SITEURL }}">NIKA:\</a>{% block npath %}{% endblock %}>
-        <span class="command">{{ cmd }}<span class="cursor">❚</span></span>
-    </h1>
-{% endmacro %}
-
 <body>
     <div id="layout">
         <div class="content">
-            {{ prompt("list") }}
+            <h1 class="content-subhead">
+                <a class="post-category" href="{{ SITEURL }}">NIKA:\</a>{% block npath %}{% endblock %}>
+                <span class="command">list<span class="cursor">❚</span></span>
+            </h1>
 
             {% block content %}
             {% endblock %}
