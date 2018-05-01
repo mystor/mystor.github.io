@@ -1,0 +1,30 @@
+{% extends 'index.html' %}
+{% block sidebar %}{% if article.sidebarimage %}{{ article.sidebarimage }}{% else %}{{ super() }}{% endif %}{% endblock %}
+{% block npath %}<a href="#" class="post-category">{{ article.slug }}\</a>{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="{{ SITEURL }}/theme/css/pygments.css">
+{% endblock %}
+
+{% block head_js %}
+    {% if article and article.latex %}
+        {{ article.latex }}
+    {% endif %}
+    {% if page and page.latex %}
+        {{ page.latex }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <section class="post">
+        <header class="post-header">
+            <h1>{{ article.title }}</h1>
+            <p class="post-meta">
+                {{ article.locale_date }} &middot; {% for tag in article.tags %}
+                    <a class="post-category" href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a>
+                {% endfor %}
+            </p>
+        </header>
+    </section>
+    {{ article.content }}
+{% endblock  %}

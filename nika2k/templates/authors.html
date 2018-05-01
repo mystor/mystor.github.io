@@ -1,0 +1,10 @@
+{% extends 'index.html' %}
+{% block npath %}<a href="#" class="post-category">authors\</a>{% endblock %}
+
+{% block content %}
+    <ul>
+        {% for author, articles in authors|sort %}
+            <li><a href="{{ SITEURL }}/{{ author.url }}">{{ author }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

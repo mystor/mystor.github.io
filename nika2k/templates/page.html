@@ -1,0 +1,7 @@
+{% extends 'index.html' %}
+{% block npath %}<a href="#" class="post-category">{{ page.slug }}\</a>{% endblock %}
+
+{% block content %}
+    <h1 class="content-subhead">{{ page.title }}</h1>
+    <p>{{ page.content }}</p>
+{% endblock %}

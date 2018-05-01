@@ -1,0 +1,6 @@
+{% extends 'index.html' %}
+{% block npath %}<!--
+    --><a href="{{ SITEURL }}/categories.html" class="post-category">c\</a><!--
+    --><a href="#" class="post-category">{{ category|striptags|lower }}</a><!--
+-->{% endblock %}
+
