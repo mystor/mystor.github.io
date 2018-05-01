@@ -7,63 +7,35 @@
 
         <link rel="alternate"  href="/feeds/all.atom.xml" type="application/atom+xml" title="Nika's Box Full Atom Feed"/>
 
-        <title>ClojureScript + Meteor // Nika's Box // Random stuff in C++ and Rust.</title>
+        <title>NIKA:\clojurescript-meteor\></title>
 
 
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/theme/css/pure.css">
+    <link rel="stylesheet" href="/theme/css/nika2k.css">
     <link rel="stylesheet" href="/theme/css/pygments.css">
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/fitvids/1.0.1/jquery.fitvids.min.js"></script>
-    <script>
-        $(document).ready(function(){
-            $(".content").fitVids();
-        });
-    </script>
 </head>
 
+
 <body>
-    <div class="pure-g-r" id="layout">
-        <div class="sidebar pure-u">
-            <div class="cover-img" style="background: none repeat scroll 0% 0% #3D4F5D">
-                <div class="cover-body">
-                    <header class="header">
-                        <hgroup>
-                            <img class="avatar" src="/images/nika.png">
-                            <h1 class="brand-main"><a href="">Nika's Box</a></h1>
-                            <p class="tagline">Random stuff in C++ and Rust.</p>
-                                <p class="social">
-                                    <a href="mailto:nika@thelayzells.com">
-                                        <i class="fa fa-inbox fa-3x"></i>
-                                    </a>
-                                    <a href="https://github.com/mystor">
-                                        <i class="fa fa-github fa-3x"></i>
-                                    </a>
-                                    <a href="https://twitter.com/kneecaw">
-                                        <i class="fa fa-twitter fa-3x"></i>
-                                    </a>
-                                </p>
-                        </hgroup>
-                    </header>
-                </div>
-            </div>
-        </div>
-    <div class="pure-u">
+    <div id="layout">
         <div class="content">
-            <section class="post">
-                <header class="post-header">
-                    <h1>ClojureScript + Meteor</h1>
-                        <p class="post-meta">
-                            // under                                 <a class="post-category" href="/tag/meteor.html">meteor</a>
-                                <a class="post-category" href="/tag/clojure.html">clojure</a>
-                                <a class="post-category" href="/tag/clojurescript.html">clojurescript</a>
-                                <a class="post-category" href="/tag/integration.html">integration</a>
-                        </p>
-                </header>
-            </section>
-            <p>A few weeks ago, I released a plugin for Meteor, <a href="https://github.com/mystor/meteor-clojurescript">meteor-clojurescript</a>. The goal of this plugin was to make developing with Meteor in ClojureScript as easy as with any of the other languages which Meteor supports. The plugin certainly isn't at that state yet, but it's getting closer.</p>
+                <h1 class="content-subhead">
+        <a class="post-category" href="">NIKA:\</a><a href="#" class="post-category">clojurescript-meteor\</a>>
+        <span class="command">list<span class="cursor">❚</span></span>
+    </h1>
+
+
+    <section class="post">
+        <header class="post-header">
+            <h1>ClojureScript + Meteor</h1>
+            <p class="post-meta">
+                Sun 27 April 2014 &middot;                     <a class="post-category" href="/tag/meteor.html">meteor</a>
+                    <a class="post-category" href="/tag/clojure.html">clojure</a>
+                    <a class="post-category" href="/tag/clojurescript.html">clojurescript</a>
+                    <a class="post-category" href="/tag/integration.html">integration</a>
+            </p>
+        </header>
+    </section>
+    <p>A few weeks ago, I released a plugin for Meteor, <a href="https://github.com/mystor/meteor-clojurescript">meteor-clojurescript</a>. The goal of this plugin was to make developing with Meteor in ClojureScript as easy as with any of the other languages which Meteor supports. The plugin certainly isn't at that state yet, but it's getting closer.</p>
 <p>Meteor has a build system which it uses for compiling and aggregating files.  Whenever a file changes, it walks the project's directory structure, calling package-provided callbacks for each file with a specific extension it finds.  This callback can then add raw css and javascript assets to the project, which will be compiled and served.</p>
 <p>This system works very well with compile-to-js languages like CoffeeScript, as they map one source file to one javascript output file. Working with languages with more complicated relationships (such as less files), has always been a bit of a pain point in Meteor (all @imported less files have to be given the extension <code>.lessimport</code>, as every file with the extension <code>.less</code> is compiled seperately).  </p>
 <p>Choosing the leiningen <code>project.clj</code> file which accompanies most ClojureScript projects as the base file to compile, it is possible to fire <code>lein cljsbuild once</code> every time a file changes, which will cause the clojurescript to be compiled into a file (presumably in an ignored directory), which is then read and provided to Meteor. Unfortunately, this is unacceptably slow. Every time <code>lein cljsbuild once</code> is called, the JVM has to start up (twice), Clojure has to bootstrap itself, the ClojureScript compiler needs to initialize, the directory structure must be analyzed, and every file must be compiled, then the Google Closure compiler must be run to merge the inputs. On my computer, this would consistently take ~ 60 seconds on a small test project.</p>
@@ -78,39 +50,24 @@
  - Advanced compilation is not yet fully supported, as an externs file for Meteor hasn't been made, so any calls to the Meteor APIs will be munged
  - The compiler creates intermediate files on the disk within the project directory</p>
 <p>However, the potential in using Meteor's powerful reactivity API with the expressive power of ClojureScript is great. I can only see the plugin getting better as I gain familiarity with ClojureScript and the Meteor plugin system. For example, I have done some initial work on a hiccup-style templating interface for meteor-clojurescript, and it is turning out quite well.</p>
-            <a href="#" class="go-top">Go Top</a>
+
 <footer class="footer">
-    <p>&copy; Nika Layzell &ndash;
-        Built with <a href="https://github.com/PurePelicanTheme/pure-single">Pure Theme</a>
-        for <a href="http://blog.getpelican.com/">Pelican</a>
+    <h1 class="content-subhead">About Nika</h1>
+    <p>
+        <strong>Nika Layzell</strong> is a platform engineer working on Gecko, the engine powering
+        <a href="https://firefox.com/">Firefox</a>.<br> In her spare time, she
+        makes a fool of herself on the internet, and breaks otherwise functional
+        software.
+    </p>
+    <p>
+        <a href="https://github.com/mystor/">github\</a> &middot;
+        <a href="https://twitter.com/kneecaw/">twitter\</a> &middot;
+        <a href="/archives.html">archives\</a> &middot;
+        <a href="/categories.html">categories\</a> &middot;
+        <a href="/tags.html">tags\</a> &middot;
+        <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>
     </p>
 </footer>        </div>
     </div>
-    </div>
-    <script>
-        var $top = $('.go-top');
-
-        // Show or hide the sticky footer button
-        $(window).scroll(function() {
-            if ($(this).scrollTop() > 200) {
-                $top.fadeIn(200);
-            } else {
-                $top.fadeOut(200);
-            }
-        });
-
-        // Animate the scroll to top
-        $top.click(function(event) {
-            event.preventDefault();
-            $('html, body').animate({scrollTop: 0}, 300);
-        })
-
-        // Makes sure that the href="#" attached to the <a> elements
-        // don't scroll you back up the page.
-        $('body').on('click', 'a[href="#"]', function(event) {
-            event.preventDefault();
-        });
-    </script>
-
 </body>
 </html>

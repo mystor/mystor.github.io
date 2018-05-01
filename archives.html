@@ -7,87 +7,55 @@
 
         <link rel="alternate"  href="/feeds/all.atom.xml" type="application/atom+xml" title="Nika's Box Full Atom Feed"/>
 
-        <title>all posts // Nika's Box // Random stuff in C++ and Rust.</title>
+        <title>NIKA:\archives\></title>
 
 
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.3.0/pure-min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/theme/css/pure.css">
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <link rel="stylesheet" href="/theme/css/nika2k.css">
 </head>
 
+
 <body>
-    <div class="pure-g-r" id="layout">
-        <div class="sidebar pure-u">
-            <div class="cover-img" style="background: none repeat scroll 0% 0% #3D4F5D">
-                <div class="cover-body">
-                    <header class="header">
-                        <hgroup>
-                            <img class="avatar" src="/images/nika.png">
-                            <h1 class="brand-main"><a href="">Nika's Box</a></h1>
-                            <p class="tagline">Random stuff in C++ and Rust.</p>
-                                <p class="social">
-                                    <a href="mailto:nika@thelayzells.com">
-                                        <i class="fa fa-inbox fa-3x"></i>
-                                    </a>
-                                    <a href="https://github.com/mystor">
-                                        <i class="fa fa-github fa-3x"></i>
-                                    </a>
-                                    <a href="https://twitter.com/kneecaw">
-                                        <i class="fa fa-twitter fa-3x"></i>
-                                    </a>
-                                </p>
-                        </hgroup>
-                    </header>
-                </div>
-            </div>
-        </div>
-    <div class="pure-u-1">
+    <div id="layout">
         <div class="content">
-            <h1 class="content-subhead">All posts</h1>
-                <div class="archive-item">
-                    <h5 class="archive-date">2017</h5>
-                    <h4 class="archive-date">20 March</h4>
-                    <div class="archive-post"><a href="wouldnt-it-be-neat-p1.html">"Wouldn't it be neat if you could write C++ inline in Rust?"</a></div>
-                </div>
-                <div class="archive-item">
-                    <h5 class="archive-date">2014</h5>
-                    <h4 class="archive-date">27 April</h4>
-                    <div class="archive-post"><a href="clojurescript-meteor.html">ClojureScript + Meteor</a></div>
-                </div>
+                <h1 class="content-subhead">
+        <a class="post-category" href="">NIKA:\</a><a href="#" class="post-category">archives\</a>>
+        <span class="command">list<span class="cursor">❚</span></span>
+    </h1>
+
+
+        <div class="archive-item">
+            <h5 class="archive-date">2018</h5>
+            <h4 class="archive-date">30 April</h4>
+            <div class="archive-post"><a href="xpconnect-changelog.html">Cleaning up XPConnect</a></div>
+        </div>
+        <div class="archive-item">
+            <h5 class="archive-date">2017</h5>
+            <h4 class="archive-date">20 March</h4>
+            <div class="archive-post"><a href="wouldnt-it-be-neat-p1.html">"Wouldn't it be neat if you could write C++ inline in Rust?"</a></div>
+        </div>
+        <div class="archive-item">
+            <h5 class="archive-date">2014</h5>
+            <h4 class="archive-date">27 April</h4>
+            <div class="archive-post"><a href="clojurescript-meteor.html">ClojureScript + Meteor</a></div>
+        </div>
+
 <footer class="footer">
-    <p>&copy; Nika Layzell &ndash;
-        Built with <a href="https://github.com/PurePelicanTheme/pure-single">Pure Theme</a>
-        for <a href="http://blog.getpelican.com/">Pelican</a>
+    <h1 class="content-subhead">About Nika</h1>
+    <p>
+        <strong>Nika Layzell</strong> is a platform engineer working on Gecko, the engine powering
+        <a href="https://firefox.com/">Firefox</a>.<br> In her spare time, she
+        makes a fool of herself on the internet, and breaks otherwise functional
+        software.
+    </p>
+    <p>
+        <a href="https://github.com/mystor/">github\</a> &middot;
+        <a href="https://twitter.com/kneecaw/">twitter\</a> &middot;
+        <a href="/archives.html">archives\</a> &middot;
+        <a href="/categories.html">categories\</a> &middot;
+        <a href="/tags.html">tags\</a> &middot;
+        <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>
     </p>
 </footer>        </div>
     </div>
-    </div>
-    <script>
-        var $top = $('.go-top');
-
-        // Show or hide the sticky footer button
-        $(window).scroll(function() {
-            if ($(this).scrollTop() > 200) {
-                $top.fadeIn(200);
-            } else {
-                $top.fadeOut(200);
-            }
-        });
-
-        // Animate the scroll to top
-        $top.click(function(event) {
-            event.preventDefault();
-            $('html, body').animate({scrollTop: 0}, 300);
-        })
-
-        // Makes sure that the href="#" attached to the <a> elements
-        // don't scroll you back up the page.
-        $('body').on('click', 'a[href="#"]', function(event) {
-            event.preventDefault();
-        });
-    </script>
-
 </body>
 </html>

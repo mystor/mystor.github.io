@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nika's Box, Random stuff in C++ and Rust.">
+
+        <link rel="alternate"  href="/feeds/all.atom.xml" type="application/atom+xml" title="Nika's Box Full Atom Feed"/>
+
+        <title>NIKA:\xpconnect-changelog\></title>
+
+
+    <link rel="stylesheet" href="/theme/css/nika2k.css">
+    <link rel="stylesheet" href="/theme/css/pygments.css">
+</head>
+
+
+<body>
+    <div id="layout">
+        <div class="content">
+                <h1 class="content-subhead">
+        <a class="post-category" href="">NIKA:\</a><a href="#" class="post-category">xpconnect-changelog\</a>>
+        <span class="command">list<span class="cursor">❚</span></span>
+    </h1>
+
+
+    <section class="post">
+        <header class="post-header">
+            <h1>Cleaning up XPConnect</h1>
+            <p class="post-meta">
+                Mon 30 April 2018 &middot;                     <a class="post-category" href="/tag/c.html">c++</a>
+                    <a class="post-category" href="/tag/programming.html">programming</a>
+                    <a class="post-category" href="/tag/gecko.html">gecko</a>
+                    <a class="post-category" href="/tag/xpconnect.html">xpconnect</a>
+            </p>
+        </header>
+    </section>
+    <p>Recently I was working on some patches to clean up and improve the code in
+Gecko's XPConnect module. As they ended up being somewhat complex &amp; required me
+obtaining a lot of information about how XPConnect works, I ended up writing
+some pretty in-depth commit messages.</p>
+<p>I figured that they were pretty much mini blog posts, so I've put them here.</p>
+<h3>Bug 1457972 - Part 1: Unify xpconnect cleanup codepaths, r=mccr8</h3>
+<p>It used to be that in XPConnect there were many different pieces of code for
+each place where we may need to clean up some untyped values based on their
+<code>nsXPTType</code> information. This was a mess, and meant that every time you needed
+to add a new data type you'd have to find every one of these places and add
+support for your new type to them.</p>
+<p>In fact, this was bad enough that it appears that I missed some places when
+adding my webidl support! Which means that in some edge cases we may clean up
+one of these values incorrectly D:!</p>
+<p>This patch adds a new unified method which performs the cleanup by looking at a
+<code>nsXPTType</code> object. The idea is that this function takes a <code>void*</code> which is
+actually a <code>T*</code> where <code>T</code> is a value of the <code>nsXPTType</code> parmaeter. It clears the
+value behind the pointer to a valid state such that free-ing the memory would
+not cause any leaks. e.g. it free(...)s owned pointers and sets the pointer to
+<code>nullptr</code>, and truncates <code>nsA[C]String</code> values such that they reference the
+static empty string.</p>
+<p>I also modify every one of these custom cleanup codepaths to instead call into
+this unified cleanup method.</p>
+<p>This also involved some simplification of helper methods in order to make the
+implementation cleaner.</p>
+<h3>Bug 1457972 - Part 2: Remove unused code paths in xpconnect, r=mccr8</h3>
+<p>Thanks to the changes in the previous patch, we had some unused code which we
+can get rid of. This patch just cleans stuff up a bit.</p>
+<h3>Bug 1457972 - Part 3: Remove unnecessary #includes of xptinfo headers, r=mccr8</h3>
+<p>We are going to want to include some "gecko internal" types in more places in
+the codebase, and we have unused includes of some of these headers in non-libxul
+files.</p>
+<p>This patch just cleans up these unnecssary includes.</p>
+<h3>Bug 1457972 - Part 4: Remove dipper types, r=mccr8</h3>
+<p>XPT accrued some weird types and flags over the years, and one of the worst of
+these is the "dipper" type flag. This flag was added for <code>ns[C]String</code> values,
+as they needed to be passed indirectly as in and out.</p>
+<p>There was another tool which was added for the same purpose, which was the
+"Indirect" behaviour. This flag is set for outparameters by default, and
+designates that a value will be passed indirectly, but is also used by jsvals
+unconditionally, as jsvals are always passed behind a pointer.</p>
+<p>The effective way that indirect parameters works is as follows:</p>
+<ol>
+<li>
+<p>When calling from C++ into JS code, the parameter data pointer is
+   dereferenced an extra time before being passed to conversion methods.</p>
+</li>
+<li>
+<p>When calling from JS into C++ code, a flag is set on the nsXPTCVariant
+   object. This flag is read by the platform-specific call code to cause them to
+   pass the pointer value stored in <code>nsXPTCVariant::ptr</code> as the parameter (which
+   points to the <code>nsXPTMiniVariant</code> member) rather than the value stored in the
+   variant, thus causing the value to be passed indirectly.</p>
+</li>
+</ol>
+<p>For reference dipper parmaeters worked in a different manner:</p>
+<ol>
+<li>
+<p>When calling from C++ into JS code, an extra level of indirection is added to
+   the passed-in pointer before passing it to conversion methods, causing the
+   pointer passed in to have a "real" type of <code>nsA[C]String**</code></p>
+</li>
+<li>
+<p>When calling from JS into C++ code, a <code>nsA[C]String</code> object is allocated
+   using a custom allocator (which tries to avoid allocating for the first 2
+   strings of each type, and after that heap allocates), and the allocation's
+   pointer is stored in the variant. The value is not considered as being passed
+   "indirectly" for both in and out parameters.</p>
+</li>
+</ol>
+<p>As you can see, these two mechanisms take similar but slightly different
+approaches. The most notable difference is that in the Indirect case, the "real"
+value is assumed to be stored directly in the <code>nsXPTCVariant</code> object in the JS
+-&gt; C++ case. This was probably not done in the past for <code>ns[C]String</code> as the
+<code>nsXPTCVariant</code> object did not have enough space to allocate a <code>ns[C]String</code>
+object, as it could only hold 8 bytes of information.</p>
+<p>Fortunately for us, we actually have <em>two</em> variants of <code>nsXPTCVariant</code>, the
+<code>nsXPTCMiniVariant</code> is what is used most of the time, such as when calling from
+C++ into JS, while the <code>nsXPTCVariant</code> is what is used when we need to actually
+allocate space to store whatever value we're passing ourselves (namely it is
+only used in the JS -&gt; C++ case).</p>
+<p><code>nsXPTCVariant</code> is (almost) always allocated on the stack (It is allocated in a
+stack-allocated <code>AutoTArray</code> with a inline capacity of 8. For reference, the
+largest parameter count of a JS-exposed xpt method right now is 14 - I
+considered bumping the inline capacity up to 16 to make it so we never need to
+heap allocate parmaeters, but it seemed like it should be done in a seperate
+bug).</p>
+<p>This object is also already pretty big. It has in it:
+ 1. a <code>nsXPTCMiniVariant</code> (8 bytes)
+ 2. a <code>nsXPTType</code> (3 bytes)
+ 3. a <code>void*</code> for indirect calls (8/4 bytes)
+ 4. a flag byte (1 byte)</p>
+<p>We only need to add enough space to store a <code>ns[C]String</code> in the
+<code>nsXPTCVariant</code>, and not in <code>nsXPTCMiniVariant</code>. My approach to this problem was
+to make <code>nsXPTCVariant</code> actually hold a union of a <code>nsXPTCMiniVariant</code>, and some
+storage space for the other, potentially larger information, which we never need
+to store in a MiniVariant.</p>
+<p>This allows us to stack allocate the <code>ns[C]Strings</code> created by XPConnect and
+avoid the use of dipper types entirely, in favour of just using indirect values.
+It also allows us to delete some of the now-unnecessary custom allocator code
+for <code>ns[C]String</code> objects.</p>
+<h3>Bug 1457972 - Part 5: Use modern JS APIs to root jsval temporaries in XPConnect, r=mccr8</h3>
+<p>When a jsval passed from JS code it needs to be stored in a <code>nsXPTCVariant</code>
+object. This object is not rooted by default, as it is stored in some
+C++-allocated memory. Currently, we root the values by adding a custom root
+using the <code>js::AddRawValueRoot</code> API, which is deprecated, and only used by this
+code and ErrorResult.</p>
+<p>This also has the unfortunate effect that we cannot support XPCOM arrays of
+jsvals, as we cannot root all of the values in the array using this API.</p>
+<p>Fortunately, the JS engine has a better rooting API which we can use here
+instead. I make the call context a custom rooter, like the <code>SequenceRooter</code> type
+from WebIDL, and make sure to note every jsval when tracing, both in arrays and
+as direct values.</p>
+<p>This should allow us to avoid some hashtable operations with roots when
+performing XPConnect calls, and remove a consumer of this gross legacy API.</p>
+<p>In addition it allows us to support arrays. This will be even more useful in the
+future when I add support for <code>sequence&lt;T&gt;</code> (which is a <code>nsTArray&lt;T&gt;</code>) to xpidl
+and xpconnect.</p>
+<h3>Bug 1457972 - Part 6: Ensure the extended types list has some basic types with known indexes, r=mccr8</h3>
+<p>Currently <code>XPCVariant</code> has some code for working with arrays of a series of
+basic types. I want to unify and simplify code which works with <code>nsXPTTypes</code> to
+always take the topmost level type (rather than passing in an array element type
+when working with an array).</p>
+<p>This is pretty easy for most of XPConnect, but <code>XPCVariant</code> occasionally needs
+to perform calls on made-up array types, which isn't compatible with the current
+implementation. Fortunately, it only needs a very small set of array types. This
+patch adds a set of simple types (mostly the arithmetic types and
+<code>TD_INTERFACE_IS_TYPE</code> for interfaces) to the extra types array unconditionally
+with a known index, for <code>XPCVariant</code>.</p>
+<p>An other option I was considering was to consider the value <code>0xff</code> in the data
+byte on <code>nsXPTType</code> to be a flag which indicates that the array element type is
+actually the type immediately following the current <code>nsXPTType</code> object in
+memory, but that was incompatible with many of the existing <code>nsXPTType</code>
+consumers which copy the <code>nsXPTType</code> objects around (e.g. onto the stack),
+rather than always using them by reference, so I decided it was not a good
+approach to take.</p>
+<h3>Bug 1457972 - Part 7: Eliminate XPCConvert::NativeStringWithSize2JS/JSStringWithSize2Native, r=mccr8</h3>
+<p>XPIDL supports explicitly sized string types. These types currently have to be
+handled by a separate entry point into <code>XPCConvert</code>, and don't share any logic
+with the implicitly sized string types.</p>
+<p>If we just add an array length parameter to the basic <code>JSData2Native</code> and
+<code>NativeData2JS</code> methods we can handle them in the same place as every other
+type.</p>
+<p>This also allows us to share a lot of code with non-sized string types, which is
+nice :-).</p>
+<h3>Bug 1457972 - Part 8: Remove external consumers of XPCConvert::NativeArray2JS/JSArray2Native, r=mccr8</h3>
+<p>Current XPIDL native arrays currently also require a custom entry point. With
+the new arraylen parameter we can handle them in
+<code>JSData2Native</code>/<code>NativeData2JS</code>. As these methods are more complex and don't
+share logic with an existing codepath, I keep them in external helper methods.</p>
+
+<footer class="footer">
+    <h1 class="content-subhead">About Nika</h1>
+    <p>
+        <strong>Nika Layzell</strong> is a platform engineer working on Gecko, the engine powering
+        <a href="https://firefox.com/">Firefox</a>.<br> In her spare time, she
+        makes a fool of herself on the internet, and breaks otherwise functional
+        software.
+    </p>
+    <p>
+        <a href="https://github.com/mystor/">github\</a> &middot;
+        <a href="https://twitter.com/kneecaw/">twitter\</a> &middot;
+        <a href="/archives.html">archives\</a> &middot;
+        <a href="/categories.html">categories\</a> &middot;
+        <a href="/tags.html">tags\</a> &middot;
+        <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>
+    </p>
+</footer>        </div>
+    </div>
+</body>
+</html>

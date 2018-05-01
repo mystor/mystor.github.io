@@ -1,0 +1,142 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: rgb(142, 142, 214);
+}
+a:hover,
+a:focus {
+    text-decoration: underline;
+}
+
+
+pre {
+    padding: 15px 15px 15px 15px;
+    font-size: 90%;
+    box-shadow: 2px 2px 2px #888;
+}
+
+.content-subhead {
+    text-transform: uppercase;
+    color: #aaa;
+    border-bottom: 1px solid #eee;
+    padding: 0.4em 0;
+    font-size: 80%;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+}
+
+.content {
+    padding: 2em 3em 0;
+    max-width: 1000px;
+    font-size: 110%;
+    line-height: 1.45;
+    color: #333332;
+}
+
+.post {
+    padding-bottom: 1em;
+    border-bottom: 1px solid #f2f2f0;
+}
+.post-title {
+    font-size: 1.5em;
+    color: #333332;
+    letter-spacing: -1px;
+}
+.post-meta {
+    color: #999;
+    font-size: 90%;
+    margin-top: -10px;
+}
+
+.post-category {
+    margin: 0 0.1em;
+    padding: 0.2em 0.6em;
+    color: #fff;
+    background: #999;
+    font-size: 90%;
+}
+
+.archive-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #f2f2f0;
+}
+
+.archive-date {
+    margin: 0;
+}
+
+.archive-post {
+    line-height: 130%;
+}
+
+.archive-meta {
+    color: #999;
+    font-size: 80%;
+    margin: -1px 0 0 0;
+}
+
+.footer {
+    text-align: center;
+    padding: 2em 0;
+    font-size: 75%;
+}
+
+.pagination-wrapper {
+    padding-top: 6px;
+}
+.pagination-left, .pagination-right {
+    position: absolute;
+    top: 0;
+}
+.pagination {
+    font-size: 80%;
+    text-align: center;
+    position: relative;
+    width: 450px;
+    margin: 0 auto;
+    max-width: 100%;
+}
+.pagination-left {
+    left: 0;
+}
+.pagination-right {
+    right: 0;
+}
+
+.highlight pre {
+    font-size: 75%;
+}
+
+.cursor {
+    font-size: 125%;
+    animation: cursor 1s linear infinite;
+}
+
+@keyframes cursor {
+    50% {
+        opacity: .3;
+    }
+}
+
+.command {
+    text-transform: lowercase;
+}
+
+/* LAYOUT CSS */
+@media (max-width: 767px) {
+    .content {
+        padding: 1em 1.5em 0;
+        font-size: 85%;
+    }
+}
