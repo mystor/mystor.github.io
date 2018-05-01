@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Nika's Box</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2018-04-30T08:00:00-04:00</updated><entry><title>Cleaning up XPConnect</title><link href="/xpconnect-changelog.html" rel="alternate"></link><published>2018-04-30T08:00:00-04:00</published><updated>2018-04-30T08:00:00-04:00</updated><author><name>Nika Layzell</name></author><id>tag:None,2018-04-30:/xpconnect-changelog.html</id><summary type="html">&lt;p&gt;Recently I was working on some patches to clean up and improve the code in
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Nika's Box</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2018-04-30T08:00:00-04:00</updated><entry><title>Cleaning up XPConnect</title><link href="/xpconnect-changelog.html" rel="alternate"></link><published>2018-04-30T08:00:00-04:00</published><updated>2018-04-30T08:00:00-04:00</updated><author><name>Nika Layzell</name></author><id>tag:None,2018-04-30:/xpconnect-changelog.html</id><summary type="html">&lt;p&gt;Recently I was working on &lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1457972"&gt;some patches&lt;/a&gt; to clean up and improve the code in
 Gecko's XPConnect module. As they ended up being somewhat complex &amp;amp; required me
 obtaining a lot of information about how XPConnect works, I ended up writing
 some pretty in-depth commit messages.&lt;/p&gt;
-&lt;p&gt;I figured that they were …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I was working on some patches to clean up and improve the code in
+&lt;p&gt;I figured that they were …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I was working on &lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1457972"&gt;some patches&lt;/a&gt; to clean up and improve the code in
 Gecko's XPConnect module. As they ended up being somewhat complex &amp;amp; required me
 obtaining a lot of information about how XPConnect works, I ended up writing
 some pretty in-depth commit messages.&lt;/p&gt;
