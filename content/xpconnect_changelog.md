@@ -6,7 +6,7 @@ Tags: c++, programming, gecko, xpconnect
 Slug: xpconnect-changelog
 Authors: Nika Layzell
 
-Recently I was working on some patches to clean up and improve the code in
+Recently I was working on [some patches] to clean up and improve the code in
 Gecko's XPConnect module. As they ended up being somewhat complex & required me
 obtaining a lot of information about how XPConnect works, I ended up writing
 some pretty in-depth commit messages.
@@ -195,3 +195,5 @@ Current XPIDL native arrays currently also require a custom entry point. With
 the new arraylen parameter we can handle them in
 `JSData2Native`/`NativeData2JS`. As these methods are more complex and don't
 share logic with an existing codepath, I keep them in external helper methods.
+
+[some patches]: https://bugzilla.mozilla.org/show_bug.cgi?id=1457972
