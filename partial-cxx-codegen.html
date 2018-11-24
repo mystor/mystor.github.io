@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nika's Box, Random stuff in C++ and Rust.">
+
+        <link rel="alternate"  href="https://mystor.github.io/feeds/all.atom.xml" type="application/atom+xml" title="Nika's Box Full Atom Feed"/>
+
+        <title>NIKA:\partial-cxx-codegen\></title>
+
+
+    <link rel="stylesheet" href="https://mystor.github.io/theme/css/nika2k.css">
+    <link rel="stylesheet" href="https://mystor.github.io/theme/css/pygments.css">
+</head>
+
+<body>
+    <div id="layout">
+        <div class="content">
+            <h1 class="content-subhead">
+                <a class="post-category" href="https://mystor.github.io">NIKA:\</a><a href="#" class="post-category">partial-cxx-codegen\</a>>
+                <span class="command">list<span class="cursor">❚</span></span>
+            </h1>
+
+    <section class="post">
+        <header class="post-header">
+            <h1>Partially Generated Classes in C++</h1>
+            <p class="post-meta">
+                Sat 24 November 2018 &middot;                     <a class="post-category" href="https://mystor.github.io/tag/c.html">c++</a>
+                    <a class="post-category" href="https://mystor.github.io/tag/classes.html">classes</a>
+                    <a class="post-category" href="https://mystor.github.io/tag/codegen.html">codegen</a>
+                    <a class="post-category" href="https://mystor.github.io/tag/oop.html">oop</a>
+            </p>
+        </header>
+    </section>
+    <p>An interesting problem which I've seen come up decently often in C++ code generators is how to deal with what I'm calling "partially generated classes". We want to generate methods and members for a class which call other methods on that class added by the implementation.</p>
+<h2>Potential Solutions</h2>
+<p>I'm not sure what the "best" solution is in this case, but I figured I'd enumerate some of the options avaliable to us with an example. We'll look at how each of these dynamically route a call to a series of impl-defined calls.</p>
+<h3>Virtual Methods</h3>
+<p>The most obvious way I've seen to implement something like this is using C++ inheritance and virtual methods, so let's start with that.</p>
+<div class="highlight"><pre><span></span><span class="c1">// Generated.h</span>
+<span class="k">class</span> <span class="nc">Generated</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">virtual</span> <span class="kt">int</span> <span class="n">Case0</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="kt">int</span> <span class="nf">Case1</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="kt">int</span> <span class="nf">RouteCall</span><span class="p">(</span><span class="kt">int</span> <span class="n">to</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="c1">// Generated.cpp</span>
+<span class="kt">int</span>
+<span class="n">Generated</span><span class="o">::</span><span class="n">RouteCall</span><span class="p">(</span><span class="kt">int</span> <span class="n">to</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="n">to</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="mi">0</span><span class="o">:</span>
+        <span class="k">return</span> <span class="n">Case0</span><span class="p">();</span>
+    <span class="k">case</span> <span class="mi">1</span><span class="o">:</span>
+        <span class="k">return</span> <span class="n">Case1</span><span class="p">();</span>
+    <span class="k">default</span><span class="o">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Impl.h</span>
+<span class="k">class</span> <span class="nc">Impl</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Generated</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">Case0</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+    <span class="kt">int</span> <span class="n">Case1</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<h4>The good</h4>
+<ul>
+<li>Codegen doesn't need to know Impl's concrete name or header</li>
+<li>Codegen can easily add codegen-private state</li>
+<li>Codegen methods may be defined out-of-line</li>
+<li>No unsafe type casting</li>
+</ul>
+<h4>The bad</h4>
+<ul>
+<li>Codegen must write concrete types for each overrideable method<ul>
+<li>This means that the overrides are less flexible</li>
+<li>Could lead to codegen-ing ugly <code>const int&amp;</code> signatures or similar</li>
+</ul>
+</li>
+<li>Unavoidable virtual function call overhead &amp; vtable</li>
+</ul>
+<h3>Curious Recurring Template Pattern</h3>
+<p>The most common solution to the virtual method approach I've seen is to use the Curious Recurring Template Pattern. This allows avoidng many of the virtual dispatch downsides, at the cost of requiring generated code end up in a header.</p>
+<div class="highlight"><pre><span></span><span class="c1">// Generated.h</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">I</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">Generated</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="c1">// NOTE: Must be inline!</span>
+    <span class="kt">int</span> <span class="n">RouteCall</span><span class="p">(</span><span class="kt">int</span> <span class="n">to</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">switch</span> <span class="p">(</span><span class="n">to</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="mi">0</span><span class="o">:</span>
+            <span class="k">return</span> <span class="n">Downcast</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">Case0</span><span class="p">();</span>
+        <span class="k">case</span> <span class="mi">1</span><span class="o">:</span>
+            <span class="k">return</span> <span class="n">Downcast</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">Case1</span><span class="p">();</span>
+        <span class="k">default</span><span class="o">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">I</span><span class="o">*</span> <span class="n">Downcast</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">I</span><span class="o">*&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">);</span> <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// Impl.h</span>
+<span class="k">class</span> <span class="nc">Impl</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Generated</span><span class="o">&lt;</span><span class="n">Impl</span><span class="o">&gt;</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">Case0</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+    <span class="kt">int</span> <span class="n">Case1</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<h4>The good</h4>
+<ul>
+<li>Codegen doesn't need to know Impl's concrete name or header</li>
+<li>Codegen can easily add codegen-private state</li>
+<li>No virtual call overhead &amp; no vtable</li>
+<li>Generated method calls can adapt to Impl's implementation with templates</li>
+</ul>
+<h4>The bad</h4>
+<ul>
+<li>Every method of Generated needs to be declared in the header</li>
+<li>Unsafe type casting</li>
+</ul>
+<h3>Knowitall Base Class</h3>
+<p>I don't know of a good name for this potential solution. It's a lot like the CRTP approach, except that it takes advantage of the Codegen's ability to include the Impl's definition in its cpp file to avoid the template parameter.</p>
+<p>I call it a Knowitall Class because it claims to know exactly who is subclassing it, and just downcasts the class hierarchy away.</p>
+<div class="highlight"><pre><span></span><span class="c1">// Codegen.h</span>
+<span class="k">class</span> <span class="nc">Impl</span><span class="p">;</span>
+
+<span class="k">class</span> <span class="nc">Generated</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">RouteCall</span><span class="p">(</span><span class="kt">int</span> <span class="n">to</span><span class="p">);</span>
+
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">Impl</span><span class="o">*</span> <span class="n">Downcast</span><span class="p">();</span>
+<span class="p">};</span>
+
+<span class="c1">// Codegen.cpp</span>
+<span class="cp">#include</span> <span class="cpf">&quot;Impl.h&quot;</span><span class="cp"></span>
+
+<span class="n">Impl</span><span class="o">*</span>
+<span class="n">Generated</span><span class="o">::</span><span class="n">Downcast</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Impl</span><span class="o">*&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span>
+<span class="n">Generated</span><span class="o">::</span><span class="n">RouteCall</span><span class="p">(</span><span class="kt">int</span> <span class="n">to</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="n">to</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="mi">0</span><span class="o">:</span>
+        <span class="k">return</span> <span class="n">Downcast</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">Case0</span><span class="p">();</span>
+    <span class="k">case</span> <span class="mi">1</span><span class="o">:</span>
+        <span class="k">return</span> <span class="n">Downcast</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">Case1</span><span class="p">();</span>
+    <span class="k">default</span><span class="o">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Impl.h</span>
+<span class="k">class</span> <span class="nc">Impl</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Generated</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">Case0</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+    <span class="kt">int</span> <span class="n">Case1</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<h4>The good</h4>
+<ul>
+<li>Codegen can easily add codegen-private state</li>
+<li>No virtual call overhead &amp; no vtable</li>
+<li>Generated method calls can adapt to Impl's implementation with templates</li>
+<li>Codegen methods may be defined out-of-line</li>
+</ul>
+<h4>The bad</h4>
+<ul>
+<li>Codegen needs to know Impl's concrete typename and header</li>
+<li>It's easy to mess up by inheriting a different class from Generated.<ul>
+<li>I don't know how big of an issue that this is in most codebases. It could be said that CRTP also has this problem.</li>
+</ul>
+</li>
+<li>Unsafe type casting</li>
+</ul>
+<h3>Member Declaration Macros</h3>
+<p>This approach uses a macro to inject the needed method declarations directly into the impl class, which avoids the need for the Generated base class which should only have one subclass.</p>
+<div class="highlight"><pre><span></span><span class="c1">// Generated.h</span>
+<span class="cp">#define DECL_GENERATED_FOR_IMPL() \</span>
+<span class="cp">    public:                       \</span>
+<span class="cp">        int RouteCall(int to);    \</span>
+<span class="cp">    </span><span class="cm">/* ... */</span><span class="cp">                     \</span>
+<span class="cp">    public:</span>
+
+<span class="c1">// Generated.cpp</span>
+<span class="cp">#include</span> <span class="cpf">&quot;Impl.h&quot;</span><span class="cp"></span>
+
+<span class="kt">int</span>
+<span class="n">Impl</span><span class="o">::</span><span class="n">RouteCall</span><span class="p">(</span><span class="kt">int</span> <span class="n">to</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="n">to</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="mi">0</span><span class="o">:</span>
+        <span class="k">return</span> <span class="n">Case0</span><span class="p">();</span>
+    <span class="k">case</span> <span class="mi">1</span><span class="o">:</span>
+        <span class="k">return</span> <span class="n">Case1</span><span class="p">();</span>
+    <span class="k">default</span><span class="o">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Impl.h</span>
+<span class="k">class</span> <span class="nc">Impl</span>
+<span class="p">{</span>
+    <span class="n">DECL_GENERATED_FOR_IMPL</span><span class="p">()</span>
+
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">Case0</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+    <span class="kt">int</span> <span class="n">Case1</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<h4>The good</h4>
+<ul>
+<li>No virtual call overhead &amp; no vtable</li>
+<li>Generated method calls can adapt to Impl's implementation with templates</li>
+<li>Codegen methods may be defined out-of-line</li>
+<li>No unsafe type casting</li>
+</ul>
+<h4>The bad</h4>
+<ul>
+<li>Codegen needs to know Impl's concrete typename and header</li>
+<li>Cannot easily add codegen-private state</li>
+<li>Uses preprocessor macros, which are a bit ugly to read, write &amp; codegen</li>
+</ul>
+<h3>Freestanding Functions</h3>
+<p>Finally, we can take the function-call approach and not declare any methods on Impl at all, instead declaring freestanding methods and using function overloading.</p>
+<div class="highlight"><pre><span></span><span class="c1">// Generated.h</span>
+<span class="kt">int</span> <span class="nf">RouteCall</span><span class="p">(</span><span class="n">Impl</span><span class="o">*</span> <span class="n">self</span><span class="p">,</span> <span class="kt">int</span> <span class="n">to</span><span class="p">);</span>
+
+<span class="c1">// Generated.cpp</span>
+<span class="kt">int</span>
+<span class="nf">RouteCall</span><span class="p">(</span><span class="n">Impl</span><span class="o">*</span> <span class="n">self</span><span class="p">,</span> <span class="kt">int</span> <span class="n">to</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="n">to</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="mi">0</span><span class="o">:</span>
+        <span class="k">return</span> <span class="n">self</span><span class="o">-&gt;</span><span class="n">Case0</span><span class="p">();</span>
+    <span class="k">case</span> <span class="mi">1</span><span class="o">:</span>
+        <span class="k">return</span> <span class="n">self</span><span class="o">-&gt;</span><span class="n">Case1</span><span class="p">();</span>
+    <span class="k">default</span><span class="o">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Impl.h</span>
+<span class="k">class</span> <span class="nc">Impl</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">Case0</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+    <span class="kt">int</span> <span class="n">Case1</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<h4>The good</h4>
+<ul>
+<li>No virtual call overhead &amp; no vtable</li>
+<li>Generated method calls can adapt to Impl's implementation with templates</li>
+<li>Codegen methods may be defined out-of-line</li>
+<li>No unsafe type casting</li>
+</ul>
+<h4>The bad</h4>
+<ul>
+<li>Codegen needs to know Impl's concrete typename and header</li>
+<li>Cannot easily add codegen-private member variables / state</li>
+<li>Calls to generated methods don't use standard C++ method call syntax.</li>
+</ul>
+
+<footer class="footer">
+    <h1 class="content-subhead">About Nika</h1>
+    <p>
+        <strong>Nika Layzell</strong> is a platform engineer working on Gecko, the engine powering
+        <a href="https://firefox.com/">Firefox</a>.<br> In her spare time, she
+        makes a fool of herself on the internet, and breaks otherwise functional
+        software.
+    </p>
+    <p>
+        <a href="https://github.com/mystor/">github\</a> &middot;
+        <a href="https://twitter.com/kneecaw/">twitter\</a> &middot;
+        <a href="https://mystor.github.io/archives.html">archives\</a> &middot;
+        <a href="https://mystor.github.io/categories.html">categories\</a> &middot;
+        <a href="https://mystor.github.io/tags.html">tags\</a> &middot;
+        <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>
+    </p>
+</footer>        </div>
+    </div>
+</body>
+</html>
