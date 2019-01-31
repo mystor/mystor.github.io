@@ -1,4 +1,4 @@
-Title: Fission Engineering Newsletter 1
+Title: Fission Engineering Newsletter #1
 Date: 2018-01-31 3:00pm
 Modified: 2018-01-31 3:00pm
 Category: Programming
@@ -18,7 +18,7 @@ attack posed a serious threat to the browsers because webpages often serve
 JavaScript from multiple domains that run in the same process. This
 vulnerability would enable malicious third-party code to steal sensitive user
 data belonging to a site hosting that code, a serious flaw that would violate
-a web security cornerstone known as same origin policy.
+a web security cornerstone known as [Same-origin policy].
 
 Thanks to the heroic efforts of the Firefox JS and Security teams, we were
 able to mitigate these vulnerabilities right away. However, these mitigations
@@ -31,7 +31,7 @@ We aim to build a browser which isn't just secure against known security
 vulnerabilities, but also has layers of built-in defense against potential
 future vulnerabilities. To accomplish this, we need to revamp the
 architecture of Firefox and support full Site Isolation. We call this next
-step in the evolution of Firefox’s process model "Project Fission". While
+step in the evolution of Firefox’s process model "**Project Fission**". While
 Electrolysis split our browser into Content and Chrome, with Fission, we will
 "split the atom", splitting cross-site iframes into different processes than
 their parent frame.
@@ -61,15 +61,20 @@ out-of-process iframes, which encompasses some major work, including, but not
 limited to, the following contributions:
 
 * **:rhunt** is implementing basic out-of-process iframe rendering behind a
-  pref & testing attribute in [Bug 1500257]
-* **:jdai** is implementing native JS Window Actor APIs which FrameScripts can
-  be migrated to in [Bug 1467212]
+  pref. ([Bug 1500257])
+* **:jdai** is implementing native JS Window Actor APIs to migrate FrameScripts.
+  ([Bug 1467212])
 * **:farre** is adding support for BrowsingContext fields to be
-  synchronized between multiple content processes, with shared state between
-  all relevant processes in [Bug 1523645].
+  synchronized between multiple content processes. ([Bug 1523645])
 * **:peterv** has implemented new cross-process WindowProxy objects to
-  correctly emulate the `Window` object APIs exposed to cross-origin documents
-  in [Bug 1353867].
+  correctly emulate the `Window` object APIs exposed to cross-origin documents.
+  ([Bug 1353867])
+* **:mattn** is converting the FormAutoFillListeners code to the actors infrastructure. ([Bug 1474143])
+* **:felipe** simulated the Fission API for communicating between parent and child processes. ([Bug 1493984])
+* **:heycam** is working on sharing UA stylesheets between processes. ([Bug 1474793])
+* **:kmag**, **:erahm** and many others have reduced per-process memory overhead!
+* **:jld** is working on async process launches
+* **:dragana**, **:kershaw** and others are moving networking logic into a socket process. ([Bug 1322426])
 * ...and so much more!
 
 If you want an up-to-date view of Milestone 1, you can see the [current Milestone 1 status]
@@ -193,8 +198,8 @@ the same underlying transport.
 - within a.com's process -
 
          +-------+
-	 | TC: 1 |
-	 +-------+
+         | TC: 1 |
+         +-------+
              |
          +-- 1 --+
          | a.com |
@@ -217,10 +222,10 @@ the same underlying transport.
     +-- 3 --+    +-- 4 --+
     | b.com |    | b.com |
     +-------+    +-------+
-	             |
+                     |
                  +-- 5 --+
-	         | b.com |
-	         +-------+
+                 | b.com |
+                 +-------+
 
 - within the parent process -
 
@@ -245,8 +250,7 @@ Fission over the coming months, but am not quite ready to commit to a weekly or
 bi-weekly newsletter schedule.
 
 If you're interested in helping out with the newsletter, please reach out and
-let me know!.
-
+let me (Nika) know!.
 
 
 ### TL;DR
@@ -256,28 +260,25 @@ February. Please file bugs related to fission and mark them as "Fission
 Milestone: ?" so we can triage them into the correct milestone.
 
 
-### Thanks
-
-This is a massive multi-team effort, and I want to give a huge shout-out to
-everyone who has helped make Fission possible so far, including:
-
-Alexandre Poirot, Alphan Chen, Andreas Farre, Andrew McCreight, Andrew Overholt, Anne van Kesteren, Anthony Jones, Boris Zbarsky, Dave Camp, David Bolter, David Durst, Dragana Damjanovic, Ehsan Akhgari, Eric Rahm, Eric Rescorla, Felipe Gomes, Henri Sivonen, James Teh, James Willcox, Jason Duell, Jim Mathies, John Dai, Jonathan Watt, Julie McCracken, Kartikaya Gupta, Kev Needham, Kris Maglione, Kyle Machulis, Maire Reavy, Marissa Morris, Mike Conley, Neha Kochar, Nils Ohlmeier, Patricia Lawless, Peter Dolanjski, Peter Van Der Beken, Ron Manning, Ryan Hunt, Sean Voisen, Selena Deckelmann, Soledad Penades, Thomas Elin, Tom Ritter, Valentin Goșu, Yulia Startsev
-
-
 ---
 
 *Thanks for reading, and best of luck splitting the atom!*
 
-The Project Fission Team
+[The Project Fission Team]
 
 
 [publicly disclosed]: https://googleprojectzero.blogspot.com/2018/01/reading-privileged-memory-with-side.html
 [Spectre]: https://spectreattack.com/spectre.pdf
 [Meltdown]: https://meltdownattack.com/meltdown.pdf
+[Same-origin policy]: https://en.m.wikipedia.org/wiki/Same-origin_policy
 [Bug 1500257]: https://bugzilla.mozilla.org/show_bug.cgi?id=1500257
 [Bug 1467212]: https://bugzilla.mozilla.org/show_bug.cgi?id=1467212
 [Bug 1523645]: https://bugzilla.mozilla.org/show_bug.cgi?id=1523645
 [Bug 1353867]: https://bugzilla.mozilla.org/show_bug.cgi?id=1353867
+[Bug 1474143]: https://bugzilla.mozilla.org/show_bug.cgi?id=1474143
+[Bug 1513045]: https://bugzilla.mozilla.org/show_bug.cgi?id=1513045
+[Bug 1493984]: https://bugzilla.mozilla.org/show_bug.cgi?id=1493984
+[Bug 1474793]: https://bugzilla.mozilla.org/show_bug.cgi?id=1474793
+[Bug 1322426]: https://bugzilla.mozilla.org/show_bug.cgi?id=1322426
 [current Milestone 1 status]: https://bugzilla.mozilla.org/buglist.cgi?classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&classification=Other&f1=cf_fission_milestone&list_id=14538804&o1=equals&query_format=advanced&v1=M1&query_based_on=&columnlist=product%2Ccomponent%2Cassigned_to%2Cshort_desc%2Cbug_status%2Cresolution%2Cstatus_whiteboard
-
-
+[The Project Fission Team]: https://wiki.mozilla.org/Project_Fission#Team
