@@ -7,7 +7,7 @@ Slug: fission-news-1
 Authors: Nika Layzell
 Status: draft
 
-A little more a year ago, a serious security flaw affecting almost all modern
+A little more than a year ago, a serious security flaw affecting almost all modern
 processors was [publicly disclosed]. Three known variants of the issue
 were announced with the names dubbed as [Spectre] (variants 1 and 2) and
 [Meltdown] (variant 3). Spectre abuses a CPU optimization technique known
