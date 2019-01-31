@@ -51,7 +51,7 @@ attack posed a serious threat to the browsers because webpages often serve
 JavaScript from multiple domains that run in the same process. This
 vulnerability would enable malicious third-party code to steal sensitive user
 data belonging to a site hosting that code, a serious flaw that would violate
-a web security cornerstone known as same origin policy.</p>
+a web security cornerstone known as <a href="https://en.m.wikipedia.org/wiki/Same-origin_policy">Same-origin policy</a>.</p>
 <p>Thanks to the heroic efforts of the Firefox JS and Security teams, we were
 able to mitigate these vulnerabilities right away. However, these mitigations
 may not save us in the future if another security vulnerability is released
@@ -100,7 +100,7 @@ limited to, the following contributions:</p>
 <li><strong>:heycam</strong> is working on sharing UA stylesheets between processes. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1474793">Bug 1474793</a>)</li>
 <li><strong>:kmag</strong>, <strong>:erahm</strong> and many others have reduced per-process memory overhead!</li>
 <li><strong>:jld</strong> is working on async process launches</li>
-<li><strong>:dragana</strong>, <strong>:kershaw</strong> and others are moving networking logic into a socket process. ([Bug 1322426])</li>
+<li><strong>:dragana</strong>, <strong>:kershaw</strong> and others are moving networking logic into a socket process. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1322426">Bug 1322426</a>)</li>
 <li>...and so much more!</li>
 </ul>
 <p>If you want an up-to-date view of Milestone 1, you can see the <a href="https://bugzilla.mozilla.org/buglist.cgi?classification=Client%20Software&amp;classification=Developer%20Infrastructure&amp;classification=Components&amp;classification=Server%20Software&amp;classification=Other&amp;f1=cf_fission_milestone&amp;list_id=14538804&amp;o1=equals&amp;query_format=advanced&amp;v1=M1&amp;query_based_on=&amp;columnlist=product%2Ccomponent%2Cassigned_to%2Cshort_desc%2Cbug_status%2Cresolution%2Cstatus_whiteboard">current Milestone 1 status</a>
@@ -198,8 +198,8 @@ the same underlying transport.</p>
 <div class="highlight"><pre><span></span>- within a.com&#39;s process -
 
          +-------+
-     | TC: 1 |
-     +-------+
+         | TC: 1 |
+         +-------+
              |
          +-- 1 --+
          | a.com |
@@ -222,10 +222,10 @@ the same underlying transport.</p>
     +-- 3 --+    +-- 4 --+
     | b.com |    | b.com |
     +-------+    +-------+
-                 |
+                     |
                  +-- 5 --+
-             | b.com |
-             +-------+
+                 | b.com |
+                 +-------+
 
 - within the parent process -
 
