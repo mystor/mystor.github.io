@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"><channel><title>Nika's Box - programming</title><link>https://mystor.github.io/</link><description></description><lastBuildDate>Mon, 30 Apr 2018 08:00:00 -0400</lastBuildDate><item><title>Cleaning up XPConnect</title><link>https://mystor.github.io/xpconnect-changelog.html</link><description>&lt;p&gt;Recently I was working on &lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1457972"&gt;some patches&lt;/a&gt; to clean up and improve the code in
+Gecko's XPConnect module. As they ended up being somewhat complex &amp;amp; required me
+obtaining a lot of information about how XPConnect works, I ended up writing
+some pretty in-depth commit messages.&lt;/p&gt;
+&lt;p&gt;I figured that they were …&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Nika Layzell</dc:creator><pubDate>Mon, 30 Apr 2018 08:00:00 -0400</pubDate><guid isPermaLink="false">tag:mystor.github.io,2018-04-30:/xpconnect-changelog.html</guid><category>mozilla</category><category>c++</category><category>programming</category><category>gecko</category><category>xpconnect</category></item></channel></rss>

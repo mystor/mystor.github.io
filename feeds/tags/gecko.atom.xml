@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Nika's Box - gecko</title><link href="https://mystor.github.io/" rel="alternate"></link><link href="https://mystor.github.io/feeds/tags/gecko.atom.xml" rel="self"></link><id>https://mystor.github.io/</id><updated>2018-04-30T08:00:00-04:00</updated><entry><title>Cleaning up XPConnect</title><link href="https://mystor.github.io/xpconnect-changelog.html" rel="alternate"></link><published>2018-04-30T08:00:00-04:00</published><updated>2018-04-30T08:00:00-04:00</updated><author><name>Nika Layzell</name></author><id>tag:mystor.github.io,2018-04-30:/xpconnect-changelog.html</id><summary type="html">&lt;p&gt;Recently I was working on &lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1457972"&gt;some patches&lt;/a&gt; to clean up and improve the code in
+Gecko's XPConnect module. As they ended up being somewhat complex &amp;amp; required me
+obtaining a lot of information about how XPConnect works, I ended up writing
+some pretty in-depth commit messages.&lt;/p&gt;
+&lt;p&gt;I figured that they were …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I was working on &lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1457972"&gt;some patches&lt;/a&gt; to clean up and improve the code in
+Gecko's XPConnect module. As they ended up being somewhat complex &amp;amp; required me
+obtaining a lot of information about how XPConnect works, I ended up writing
+some pretty in-depth commit messages.&lt;/p&gt;
+&lt;p&gt;I figured that they were pretty much mini blog posts, so I've put them here.&lt;/p&gt;
+&lt;h3&gt;Bug 1457972 - Part 1: Unify xpconnect cleanup codepaths, r=mccr8&lt;/h3&gt;
+&lt;p&gt;It used to be that in XPConnect there were many different pieces of code for
+each place where we may need to clean up some untyped values based on their
+&lt;code&gt;nsXPTType&lt;/code&gt; information. This was a mess, and meant that every time you needed
+to add a new data type you'd have to find every one of these places and add
+support for your new type to them.&lt;/p&gt;
+&lt;p&gt;In fact, this was bad enough that it appears that I missed some places when
+adding my webidl support! Which means that in some edge cases we may clean up
+one of these values incorrectly D:!&lt;/p&gt;
+&lt;p&gt;This patch adds a new unified method which performs the cleanup by looking at a
+&lt;code&gt;nsXPTType&lt;/code&gt; object. The idea is that this function takes a &lt;code&gt;void*&lt;/code&gt; which is
+actually a &lt;code&gt;T*&lt;/code&gt; where &lt;code&gt;T&lt;/code&gt; is a value of the &lt;code&gt;nsXPTType&lt;/code&gt; parmaeter. It clears the
+value behind the pointer to a valid state such that free-ing the memory would
+not cause any leaks. e.g. it free(...)s owned pointers and sets the pointer to
+&lt;code&gt;nullptr&lt;/code&gt;, and truncates &lt;code&gt;nsA[C]String&lt;/code&gt; values such that they reference the
+static empty string.&lt;/p&gt;
+&lt;p&gt;I also modify every one of these custom cleanup codepaths to instead call into
+this unified cleanup method.&lt;/p&gt;
+&lt;p&gt;This also involved some simplification of helper methods in order to make the
+implementation cleaner.&lt;/p&gt;
+&lt;h3&gt;Bug 1457972 - Part 2: Remove unused code paths in xpconnect, r=mccr8&lt;/h3&gt;
+&lt;p&gt;Thanks to the changes in the previous patch, we had some unused code which we
+can get rid of. This patch just cleans stuff up a bit.&lt;/p&gt;
+&lt;h3&gt;Bug 1457972 - Part 3: Remove unnecessary #includes of xptinfo headers, r=mccr8&lt;/h3&gt;
+&lt;p&gt;We are going to want to include some "gecko internal" types in more places in
+the codebase, and we have unused includes of some of these headers in non-libxul
+files.&lt;/p&gt;
+&lt;p&gt;This patch just cleans up these unnecssary includes.&lt;/p&gt;
+&lt;h3&gt;Bug 1457972 - Part 4: Remove dipper types, r=mccr8&lt;/h3&gt;
+&lt;p&gt;XPT accrued some weird types and flags over the years, and one of the worst of
+these is the "dipper" type flag. This flag was added for &lt;code&gt;ns[C]String&lt;/code&gt; values,
+as they needed to be passed indirectly as in and out.&lt;/p&gt;
+&lt;p&gt;There was another tool which was added for the same purpose, which was the
+"Indirect" behaviour. This flag is set for outparameters by default, and
+designates that a value will be passed indirectly, but is also used by jsvals
+unconditionally, as jsvals are always passed behind a pointer.&lt;/p&gt;
+&lt;p&gt;The effective way that indirect parameters works is as follows:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;When calling from C++ into JS code, the parameter data pointer is
+   dereferenced an extra time before being passed to conversion methods.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;When calling from JS into C++ code, a flag is set on the nsXPTCVariant
+   object. This flag is read by the platform-specific call code to cause them to
+   pass the pointer value stored in &lt;code&gt;nsXPTCVariant::ptr&lt;/code&gt; as the parameter (which
+   points to the &lt;code&gt;nsXPTMiniVariant&lt;/code&gt; member) rather than the value stored in the
+   variant, thus causing the value to be passed indirectly.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;For reference dipper parmaeters worked in a different manner:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;When calling from C++ into JS code, an extra level of indirection is added to
+   the passed-in pointer before passing it to conversion methods, causing the
+   pointer passed in to have a "real" type of &lt;code&gt;nsA[C]String**&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;When calling from JS into C++ code, a &lt;code&gt;nsA[C]String&lt;/code&gt; object is allocated
+   using a custom allocator (which tries to avoid allocating for the first 2
+   strings of each type, and after that heap allocates), and the allocation's
+   pointer is stored in the variant. The value is not considered as being passed
+   "indirectly" for both in and out parameters.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;As you can see, these two mechanisms take similar but slightly different
+approaches. The most notable difference is that in the Indirect case, the "real"
+value is assumed to be stored directly in the &lt;code&gt;nsXPTCVariant&lt;/code&gt; object in the JS
+-&amp;gt; C++ case. This was probably not done in the past for &lt;code&gt;ns[C]String&lt;/code&gt; as the
+&lt;code&gt;nsXPTCVariant&lt;/code&gt; object did not have enough space to allocate a &lt;code&gt;ns[C]String&lt;/code&gt;
+object, as it could only hold 8 bytes of information.&lt;/p&gt;
+&lt;p&gt;Fortunately for us, we actually have &lt;em&gt;two&lt;/em&gt; variants of &lt;code&gt;nsXPTCVariant&lt;/code&gt;, the
+&lt;code&gt;nsXPTCMiniVariant&lt;/code&gt; is what is used most of the time, such as when calling from
+C++ into JS, while the &lt;code&gt;nsXPTCVariant&lt;/code&gt; is what is used when we need to actually
+allocate space to store whatever value we're passing ourselves (namely it is
+only used in the JS -&amp;gt; C++ case).&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;nsXPTCVariant&lt;/code&gt; is (almost) always allocated on the stack (It is allocated in a
+stack-allocated &lt;code&gt;AutoTArray&lt;/code&gt; with a inline capacity of 8. For reference, the
+largest parameter count of a JS-exposed xpt method right now is 14 - I
+considered bumping the inline capacity up to 16 to make it so we never need to
+heap allocate parmaeters, but it seemed like it should be done in a seperate
+bug).&lt;/p&gt;
+&lt;p&gt;This object is also already pretty big. It has in it:
+ 1. a &lt;code&gt;nsXPTCMiniVariant&lt;/code&gt; (8 bytes)
+ 2. a &lt;code&gt;nsXPTType&lt;/code&gt; (3 bytes)
+ 3. a &lt;code&gt;void*&lt;/code&gt; for indirect calls (8/4 bytes)
+ 4. a flag byte (1 byte)&lt;/p&gt;
+&lt;p&gt;We only need to add enough space to store a &lt;code&gt;ns[C]String&lt;/code&gt; in the
+&lt;code&gt;nsXPTCVariant&lt;/code&gt;, and not in &lt;code&gt;nsXPTCMiniVariant&lt;/code&gt;. My approach to this problem was
+to make &lt;code&gt;nsXPTCVariant&lt;/code&gt; actually hold a union of a &lt;code&gt;nsXPTCMiniVariant&lt;/code&gt;, and some
+storage space for the other, potentially larger information, which we never need
+to store in a MiniVariant.&lt;/p&gt;
+&lt;p&gt;This allows us to stack allocate the &lt;code&gt;ns[C]Strings&lt;/code&gt; created by XPConnect and
+avoid the use of dipper types entirely, in favour of just using indirect values.
+It also allows us to delete some of the now-unnecessary custom allocator code
+for &lt;code&gt;ns[C]String&lt;/code&gt; objects.&lt;/p&gt;
+&lt;h3&gt;Bug 1457972 - Part 5: Use modern JS APIs to root jsval temporaries in XPConnect, r=mccr8&lt;/h3&gt;
+&lt;p&gt;When a jsval passed from JS code it needs to be stored in a &lt;code&gt;nsXPTCVariant&lt;/code&gt;
+object. This object is not rooted by default, as it is stored in some
+C++-allocated memory. Currently, we root the values by adding a custom root
+using the &lt;code&gt;js::AddRawValueRoot&lt;/code&gt; API, which is deprecated, and only used by this
+code and ErrorResult.&lt;/p&gt;
+&lt;p&gt;This also has the unfortunate effect that we cannot support XPCOM arrays of
+jsvals, as we cannot root all of the values in the array using this API.&lt;/p&gt;
+&lt;p&gt;Fortunately, the JS engine has a better rooting API which we can use here
+instead. I make the call context a custom rooter, like the &lt;code&gt;SequenceRooter&lt;/code&gt; type
+from WebIDL, and make sure to note every jsval when tracing, both in arrays and
+as direct values.&lt;/p&gt;
+&lt;p&gt;This should allow us to avoid some hashtable operations with roots when
+performing XPConnect calls, and remove a consumer of this gross legacy API.&lt;/p&gt;
+&lt;p&gt;In addition it allows us to support arrays. This will be even more useful in the
+future when I add support for &lt;code&gt;sequence&amp;lt;T&amp;gt;&lt;/code&gt; (which is a &lt;code&gt;nsTArray&amp;lt;T&amp;gt;&lt;/code&gt;) to xpidl
+and xpconnect.&lt;/p&gt;
+&lt;h3&gt;Bug 1457972 - Part 6: Ensure the extended types list has some basic types with known indexes, r=mccr8&lt;/h3&gt;
+&lt;p&gt;Currently &lt;code&gt;XPCVariant&lt;/code&gt; has some code for working with arrays of a series of
+basic types. I want to unify and simplify code which works with &lt;code&gt;nsXPTTypes&lt;/code&gt; to
+always take the topmost level type (rather than passing in an array element type
+when working with an array).&lt;/p&gt;
+&lt;p&gt;This is pretty easy for most of XPConnect, but &lt;code&gt;XPCVariant&lt;/code&gt; occasionally needs
+to perform calls on made-up array types, which isn't compatible with the current
+implementation. Fortunately, it only needs a very small set of array types. This
+patch adds a set of simple types (mostly the arithmetic types and
+&lt;code&gt;TD_INTERFACE_IS_TYPE&lt;/code&gt; for interfaces) to the extra types array unconditionally
+with a known index, for &lt;code&gt;XPCVariant&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;An other option I was considering was to consider the value &lt;code&gt;0xff&lt;/code&gt; in the data
+byte on &lt;code&gt;nsXPTType&lt;/code&gt; to be a flag which indicates that the array element type is
+actually the type immediately following the current &lt;code&gt;nsXPTType&lt;/code&gt; object in
+memory, but that was incompatible with many of the existing &lt;code&gt;nsXPTType&lt;/code&gt;
+consumers which copy the &lt;code&gt;nsXPTType&lt;/code&gt; objects around (e.g. onto the stack),
+rather than always using them by reference, so I decided it was not a good
+approach to take.&lt;/p&gt;
+&lt;h3&gt;Bug 1457972 - Part 7: Eliminate XPCConvert::NativeStringWithSize2JS/JSStringWithSize2Native, r=mccr8&lt;/h3&gt;
+&lt;p&gt;XPIDL supports explicitly sized string types. These types currently have to be
+handled by a separate entry point into &lt;code&gt;XPCConvert&lt;/code&gt;, and don't share any logic
+with the implicitly sized string types.&lt;/p&gt;
+&lt;p&gt;If we just add an array length parameter to the basic &lt;code&gt;JSData2Native&lt;/code&gt; and
+&lt;code&gt;NativeData2JS&lt;/code&gt; methods we can handle them in the same place as every other
+type.&lt;/p&gt;
+&lt;p&gt;This also allows us to share a lot of code with non-sized string types, which is
+nice :-).&lt;/p&gt;
+&lt;h3&gt;Bug 1457972 - Part 8: Remove external consumers of XPCConvert::NativeArray2JS/JSArray2Native, r=mccr8&lt;/h3&gt;
+&lt;p&gt;Current XPIDL native arrays currently also require a custom entry point. With
+the new arraylen parameter we can handle them in
+&lt;code&gt;JSData2Native&lt;/code&gt;/&lt;code&gt;NativeData2JS&lt;/code&gt;. As these methods are more complex and don't
+share logic with an existing codepath, I keep them in external helper methods.&lt;/p&gt;</content><category term="mozilla"></category><category term="c++"></category><category term="programming"></category><category term="gecko"></category><category term="xpconnect"></category></entry></feed>
