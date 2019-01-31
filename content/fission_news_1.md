@@ -1,60 +1,72 @@
 Title: Fission Engineering Newsletter 1
-Date: 2018-01-30 4:00pm
-Modified: 2018-01-30 4:00pm
+Date: 2018-01-31 3:00pm
+Modified: 2018-01-31 3:00pm
 Category: Programming
 Tags: mozilla, firefox, gecko, fission
 Slug: fission-news-1
 Authors: Nika Layzell
 Status: draft
 
+A little more a year ago, a serious security flaw affecting almost all modern
+processors was [publicly disclosed]. Three known variants of the issue
+were announced with the names dubbed as [Spectre] (variants 1 and 2) and
+[Meltdown] (variant 3). Spectre abuses a CPU optimization technique known
+as speculative execution to exfiltrate secret data stored in memory of other
+running programs via side channels. This might include cryptographic keys,
+passwords stored in a password manager or browser, cookies, etc. This timing
+attack posed a serious threat to the browsers because webpages often serve
+JavaScript from multiple domains that run in the same process. This
+vulnerability would enable malicious third-party code to steal sensitive user
+data belonging to a site hosting that code, a serious flaw that would violate
+a web security cornerstone known as same origin policy.
 
-A bit over a year ago, the [Spectre] vulnerability was released. This was a CPU
-vulnerability which allowed code running on your machine to read memory it
-should not have access to by abusing timing properties of the CPU. Browsers
-such as Firefox were one of the most impacted pieces of software, due to
-running JS on users machines.
+Thanks to the heroic efforts of the Firefox JS and Security teams, we were
+able to mitigate these vulnerabilities right away. However, these mitigations
+may not save us in the future if another security vulnerability is released
+exploiting the same underlying problem of sharing processes (and hence,
+memory) between different domains, some of which may be malicious. Chrome
+spent multiple years working to isolate sites in their own processes.
 
-Thanks to the heroic efforts of our JS and Security teams, we were able to
-mitigate these vulnerabilities. However, we want to be able to build a browser
-which isn't just secure against known vulnerabilities, but also has layers of
-built-in defense against future vulnerabilities. To accomplish this, we decided
-to take on a new project to revamp the architecture of Firefox and support full
-Site Isolation.
-
-We call this next step in the evolution of Firefox "*Project Fission*". While
-Electrolosys split our browser into Content and Chrome, with Fission we will
-"split the atom", breaking iframes into separate processes.
+We aim to build a browser which isn't just secure against known security
+vulnerabilities, but also has layers of built-in defense against potential
+future vulnerabilities. To accomplish this, we need to revamp the
+architecture of Firefox and support full Site Isolation. We call this next
+step in the evolution of Firefox’s process model "Project Fission". While
+Electrolysis split our browser into Content and Chrome, with Fission, we will
+"split the atom", splitting cross-site iframes into different processes than
+their parent frame.
 
 Over the last year, we have been working to lay the groundwork for Fission,
-designing new systems, and building infrastructure. In the coming weeks and
-months, we're going to be asking everyone to begin helping us with changes
-to adapt our code to a post-Fission browser architecture.
+designing new infrastructure. In the coming weeks and months, we’ll need help
+from all Firefox teams to adapt our code to a post-Fission browser
+architecture.
 
 
 ### Planning and Coordination
 
 Fission is a massive project, spanning across many different teams, so keeping
 track of what everyone is doing is a pretty big task. While we have a weekly
-project meeting, which someone on your team may already be attending, we are
-also using a Bugzilla project tracking flag to keep track of the work we have
-in progress.
+project meeting, which someone on your team may already be attending, we have
+started also using a Bugzilla project tracking flag to keep track of the work
+we have in progress.
 
 Now that we've moved past much of the initial infrastructure ground work, we
-are going to be keeping track of work with our milestone targets. Each
-milestone will contain a collection of new features and improved functionality
-which brings us incrementally closer to our goal.
+are going to keep track of work with our milestone targets. Each milestone
+will contain a collection of new features and improved functionality which
+brings us incrementally closer to our goal.
 
-Our first milestone, "Milestone 1" (clever, I know), is currently targeted for
-the end of February. We plan to have some awesome projects landed by then,
-including, but not limited to:
+Our first milestone, "Milestone 1" (clever, I know), is currently targeted
+for the end of February. In Milestone 1, we plan to have the groundwork for
+out-of-process iframes, which encompasses some major work, including, but not
+limited to, the following contributions:
 
 * **:rhunt** is implementing basic out-of-process iframe rendering behind a
   pref & testing attribute in [Bug 1500257]
 * **:jdai** is implementing native JS Window Actor APIs which FrameScripts can
   be migrated to in [Bug 1467212]
-* **:farre** is adding support to BrowsingContext trees for them to be
+* **:farre** is adding support for BrowsingContext fields to be
   synchronized between multiple content processes, with shared state between
-  all relevant processes in [Bug 1519151].
+  all relevant processes in [Bug 1523645].
 * **:peterv** has implemented new cross-process WindowProxy objects to
   correctly emulate the `Window` object APIs exposed to cross-origin documents
   in [Bug 1353867].
@@ -74,8 +86,8 @@ If you have any questions, feel free to reach out to one of us, and we'll get
 you answers, or guide you to someone who can:
 
 * Ron Manning `<rmanning@mozilla.com>` (Fission EPM)
-* Nika Layzell `<nika@mozilla.com>` (Fission Architect)
-* Neha Kochar `<nkochar@mozilla.com>` (Fission Engineering Manager)
+* Nika Layzell `<nika@mozilla.com>` (Fission Tech Lead)
+* Neha Kochar `<nkochar@mozilla.com>` (DOM Fission Engineering Manager)
 
 
 ### What's Changing?
@@ -96,7 +108,7 @@ would be the toplevel DocShell in the tab.
 
 However, in a post-Fission world, this layer for communication is no longer
 sufficient. It will be possible for multiple processes to render distinct
-subframes, meaning that each tab has multiple connected processes. 
+subframes, meaning that each tab has multiple connected processes.
 
 Components will need to adapt their IPC code to work in this new world, both by
 updating their use of existing APIs, and by adapting to use new Actors and APIs
@@ -138,7 +150,7 @@ The parent process holds a special subclass of the `BrowsingContext` object:
 `CanonicalBrowsingContext`. This object has extra fields which can be used in
 the parent to keep track of the current status of all frames in one place.
 
-#### `TabParent`, `TabChild` and IFrames 
+#### `TabParent`, `TabChild` and IFrames
 
 The `Tab{Parent,Child}` actors will continue to exist, and will always bridge
 from the parent process to a content process. However, in addition to these
@@ -236,24 +248,35 @@ If you're interested in helping out with the newsletter, please reach out and
 let me know!.
 
 
+
 ### TL;DR
 
 Fission is happening and our first "Milestone" is targeted at the end of
 February. Please file bugs related to fission and mark them as "Fission
 Milestone: ?" so we can triage them into the correct milestone.
 
+
+### Thanks
+
+This is a massive multi-team effort, and I want to give a huge shout-out to
+everyone who has helped make Fission possible so far, including:
+
+Alexandre Poirot, Alphan Chen, Andreas Farre, Andrew McCreight, Andrew Overholt, Anne van Kesteren, Anthony Jones, Boris Zbarsky, Dave Camp, David Bolter, David Durst, Dragana Damjanovic, Ehsan Akhgari, Eric Rahm, Eric Rescorla, Felipe Gomes, Henri Sivonen, James Teh, James Willcox, Jason Duell, Jim Mathies, John Dai, Jonathan Watt, Julie McCracken, Kartikaya Gupta, Kev Needham, Kris Maglione, Kyle Machulis, Maire Reavy, Marissa Morris, Mike Conley, Neha Kochar, Nils Ohlmeier, Patricia Lawless, Peter Dolanjski, Peter Van Der Beken, Ron Manning, Ryan Hunt, Sean Voisen, Selena Deckelmann, Soledad Penades, Thomas Elin, Tom Ritter, Valentin Goșu, Yulia Startsev
+
+
 ---
 
 *Thanks for reading, and best of luck splitting the atom!*
 
--Nika
+The Project Fission Team
 
 
-
-[Spectre]: https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)
+[publicly disclosed]: https://googleprojectzero.blogspot.com/2018/01/reading-privileged-memory-with-side.html
+[Spectre]: https://spectreattack.com/spectre.pdf
+[Meltdown]: https://meltdownattack.com/meltdown.pdf
 [Bug 1500257]: https://bugzilla.mozilla.org/show_bug.cgi?id=1500257
 [Bug 1467212]: https://bugzilla.mozilla.org/show_bug.cgi?id=1467212
-[Bug 1519151]: https://bugzilla.mozilla.org/show_bug.cgi?id=1519151
+[Bug 1523645]: https://bugzilla.mozilla.org/show_bug.cgi?id=1523645
 [Bug 1353867]: https://bugzilla.mozilla.org/show_bug.cgi?id=1353867
 [current Milestone 1 status]: https://bugzilla.mozilla.org/buglist.cgi?classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&classification=Other&f1=cf_fission_milestone&list_id=14538804&o1=equals&query_format=advanced&v1=M1&query_based_on=&columnlist=product%2Ccomponent%2Cassigned_to%2Cshort_desc%2Cbug_status%2Cresolution%2Cstatus_whiteboard
 
