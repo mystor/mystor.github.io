@@ -26,8 +26,13 @@ DEFAULT_PAGINATION = False
 if os.environ.get('PUBLISH'):
     SITEURL = "https://mystor.github.io"
     RELATIVE_URLS = False
+
+    # Feeds
+    FEED_DOMAIN = SITEURL
     FEED_ALL_ATOM = "feeds/all.atom.xml"
+    FEED_ALL_RSS = "feeds/all.rss.xml"
     CATEGORY_FEED_ATOM = "feeds/{slug}.atom.xml"
+    CATEGORY_FEED_RSS = "feeds/{slug}.rss.xml"
 else:
     SITEURL = "https://localhost:8000"
     RELATIVE_URLS = True
