@@ -2,7 +2,7 @@ Title: Cleaning up XPConnect
 Date: 2018-04-30 8:00
 Modified: 2018-04-30 8:00
 Category: Programming
-Tags: c++, programming, gecko, xpconnect
+Tags: mozilla, c++, programming, gecko, xpconnect
 Slug: xpconnect-changelog
 Authors: Nika Layzell
 

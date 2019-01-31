@@ -31,8 +31,10 @@ if os.environ.get('PUBLISH'):
     FEED_DOMAIN = SITEURL
     FEED_ALL_ATOM = "feeds/all.atom.xml"
     FEED_ALL_RSS = "feeds/all.rss.xml"
-    CATEGORY_FEED_ATOM = "feeds/{slug}.atom.xml"
-    CATEGORY_FEED_RSS = "feeds/{slug}.rss.xml"
+    CATEGORY_FEED_ATOM = "feeds/categories/{slug}.atom.xml"
+    CATEGORY_FEED_RSS = "feeds/categories/{slug}.rss.xml"
+    TAG_FEED_ATOM = "feeds/tags/{slug}.atom.xml"
+    TAG_FEED_RSS = "feeds/tags/{slug}.rss.xml"
 else:
     SITEURL = "https://localhost:8000"
     RELATIVE_URLS = True
