@@ -14,7 +14,7 @@
     <!-- silly twitter stuff 'cause why not -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@kneecaw">
-    <meta name="twitter:title" content="Fission Engineering Newsletter 1">
+    <meta name="twitter:title" content="Fission Engineering Newsletter #1">
     <meta name="twitter:description" content="NIKA:\fission-news-1\> _">
 
     <!-- gotta have that nice syntax highlighting~ -->
@@ -31,57 +31,76 @@
 
     <section class="post">
         <header class="post-header">
-            <h1>Fission Engineering Newsletter 1</h1>
+            <h1>Fission Engineering Newsletter #1</h1>
             <p class="post-meta">
-                Tue 30 January 2018 &middot;                     <a class="post-category" href="https://mystor.github.io/tag/mozilla.html">mozilla</a>
+                Wed 31 January 2018 &middot;                     <a class="post-category" href="https://mystor.github.io/tag/mozilla.html">mozilla</a>
                     <a class="post-category" href="https://mystor.github.io/tag/firefox.html">firefox</a>
                     <a class="post-category" href="https://mystor.github.io/tag/gecko.html">gecko</a>
                     <a class="post-category" href="https://mystor.github.io/tag/fission.html">fission</a>
             </p>
         </header>
     </section>
-    <p>A bit over a year ago, the <a href="https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)">Spectre</a> vulnerability was released. This was a CPU
-vulnerability which allowed code running on your machine to read memory it
-should not have access to by abusing timing properties of the CPU. Browsers
-such as Firefox were one of the most impacted pieces of software, due to
-running JS on users machines.</p>
-<p>Thanks to the heroic efforts of our JS and Security teams, we were able to
-mitigate these vulnerabilities. However, we want to be able to build a browser
-which isn't just secure against known vulnerabilities, but also has layers of
-built-in defense against future vulnerabilities. To accomplish this, we decided
-to take on a new project to revamp the architecture of Firefox and support full
-Site Isolation.</p>
-<p>We call this next step in the evolution of Firefox "<em>Project Fission</em>". While
-Electrolosys split our browser into Content and Chrome, with Fission we will
-"split the atom", breaking iframes into separate processes.</p>
+    <p>A little more a year ago, a serious security flaw affecting almost all modern
+processors was <a href="https://googleprojectzero.blogspot.com/2018/01/reading-privileged-memory-with-side.html">publicly disclosed</a>. Three known variants of the issue
+were announced with the names dubbed as <a href="https://spectreattack.com/spectre.pdf">Spectre</a> (variants 1 and 2) and
+<a href="https://meltdownattack.com/meltdown.pdf">Meltdown</a> (variant 3). Spectre abuses a CPU optimization technique known
+as speculative execution to exfiltrate secret data stored in memory of other
+running programs via side channels. This might include cryptographic keys,
+passwords stored in a password manager or browser, cookies, etc. This timing
+attack posed a serious threat to the browsers because webpages often serve
+JavaScript from multiple domains that run in the same process. This
+vulnerability would enable malicious third-party code to steal sensitive user
+data belonging to a site hosting that code, a serious flaw that would violate
+a web security cornerstone known as same origin policy.</p>
+<p>Thanks to the heroic efforts of the Firefox JS and Security teams, we were
+able to mitigate these vulnerabilities right away. However, these mitigations
+may not save us in the future if another security vulnerability is released
+exploiting the same underlying problem of sharing processes (and hence,
+memory) between different domains, some of which may be malicious. Chrome
+spent multiple years working to isolate sites in their own processes.</p>
+<p>We aim to build a browser which isn't just secure against known security
+vulnerabilities, but also has layers of built-in defense against potential
+future vulnerabilities. To accomplish this, we need to revamp the
+architecture of Firefox and support full Site Isolation. We call this next
+step in the evolution of Firefox’s process model "<strong>Project Fission</strong>". While
+Electrolysis split our browser into Content and Chrome, with Fission, we will
+"split the atom", splitting cross-site iframes into different processes than
+their parent frame.</p>
 <p>Over the last year, we have been working to lay the groundwork for Fission,
-designing new systems, and building infrastructure. In the coming weeks and
-months, we're going to be asking everyone to begin helping us with changes
-to adapt our code to a post-Fission browser architecture.</p>
+designing new infrastructure. In the coming weeks and months, we’ll need help
+from all Firefox teams to adapt our code to a post-Fission browser
+architecture.</p>
 <h3>Planning and Coordination</h3>
 <p>Fission is a massive project, spanning across many different teams, so keeping
 track of what everyone is doing is a pretty big task. While we have a weekly
-project meeting, which someone on your team may already be attending, we are
-also using a Bugzilla project tracking flag to keep track of the work we have
-in progress.</p>
+project meeting, which someone on your team may already be attending, we have
+started also using a Bugzilla project tracking flag to keep track of the work
+we have in progress.</p>
 <p>Now that we've moved past much of the initial infrastructure ground work, we
-are going to be keeping track of work with our milestone targets. Each
-milestone will contain a collection of new features and improved functionality
-which brings us incrementally closer to our goal.</p>
-<p>Our first milestone, "Milestone 1" (clever, I know), is currently targeted for
-the end of February. We plan to have some awesome projects landed by then,
-including, but not limited to:</p>
+are going to keep track of work with our milestone targets. Each milestone
+will contain a collection of new features and improved functionality which
+brings us incrementally closer to our goal.</p>
+<p>Our first milestone, "Milestone 1" (clever, I know), is currently targeted
+for the end of February. In Milestone 1, we plan to have the groundwork for
+out-of-process iframes, which encompasses some major work, including, but not
+limited to, the following contributions:</p>
 <ul>
 <li><strong>:rhunt</strong> is implementing basic out-of-process iframe rendering behind a
-  pref &amp; testing attribute in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1500257">Bug 1500257</a></li>
-<li><strong>:jdai</strong> is implementing native JS Window Actor APIs which FrameScripts can
-  be migrated to in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1467212">Bug 1467212</a></li>
-<li><strong>:farre</strong> is adding support to BrowsingContext trees for them to be
-  synchronized between multiple content processes, with shared state between
-  all relevant processes in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1519151">Bug 1519151</a>.</li>
+  pref. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1500257">Bug 1500257</a>)</li>
+<li><strong>:jdai</strong> is implementing native JS Window Actor APIs to migrate FrameScripts.
+  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1467212">Bug 1467212</a>)</li>
+<li><strong>:farre</strong> is adding support for BrowsingContext fields to be
+  synchronized between multiple content processes. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1523645">Bug 1523645</a>)</li>
 <li><strong>:peterv</strong> has implemented new cross-process WindowProxy objects to
-  correctly emulate the <code>Window</code> object APIs exposed to cross-origin documents
-  in <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1353867">Bug 1353867</a>.</li>
+  correctly emulate the <code>Window</code> object APIs exposed to cross-origin documents.
+  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1353867">Bug 1353867</a>)</li>
+<li><strong>:mattn</strong> is converting the FormAutoFillListeners code to the actors infrastructure. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1474143">Bug 1474143</a>)</li>
+<li><strong>:mconley</strong> is working on letting the privileged process ride the trains. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1513045">Bug 1513045</a>)</li>
+<li><strong>:felipe</strong> simulated the Fission API for communicating between parent and child processes. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1493984">Bug 1493984</a>)</li>
+<li><strong>:heycam</strong> is working on sharing UA stylesheets between processes. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1474793">Bug 1474793</a>)</li>
+<li><strong>:kmag</strong>, <strong>:erahm</strong> and many others have reduced per-process memory overhead!</li>
+<li><strong>:jld</strong> is working on async process launches</li>
+<li><strong>:dragana</strong>, <strong>:kershaw</strong> and others are moving networking logic into a socket process. ([Bug 1322426])</li>
 <li>...and so much more!</li>
 </ul>
 <p>If you want an up-to-date view of Milestone 1, you can see the <a href="https://bugzilla.mozilla.org/buglist.cgi?classification=Client%20Software&amp;classification=Developer%20Infrastructure&amp;classification=Components&amp;classification=Server%20Software&amp;classification=Other&amp;f1=cf_fission_milestone&amp;list_id=14538804&amp;o1=equals&amp;query_format=advanced&amp;v1=M1&amp;query_based_on=&amp;columnlist=product%2Ccomponent%2Cassigned_to%2Cshort_desc%2Cbug_status%2Cresolution%2Cstatus_whiteboard">current Milestone 1 status</a>
@@ -94,8 +113,8 @@ the correct milestone.</p>
 you answers, or guide you to someone who can:</p>
 <ul>
 <li>Ron Manning <code>&lt;rmanning@mozilla.com&gt;</code> (Fission EPM)</li>
-<li>Nika Layzell <code>&lt;nika@mozilla.com&gt;</code> (Fission Architect)</li>
-<li>Neha Kochar <code>&lt;nkochar@mozilla.com&gt;</code> (Fission Engineering Manager)</li>
+<li>Nika Layzell <code>&lt;nika@mozilla.com&gt;</code> (Fission Tech Lead)</li>
+<li>Neha Kochar <code>&lt;nkochar@mozilla.com&gt;</code> (DOM Fission Engineering Manager)</li>
 </ul>
 <h3>What's Changing?</h3>
 <p>In order to make each component of Firefox successfully adapt to a post-Fission
@@ -112,7 +131,7 @@ communicate directly between the "embedder", which in this case is the
 would be the toplevel DocShell in the tab.</p>
 <p>However, in a post-Fission world, this layer for communication is no longer
 sufficient. It will be possible for multiple processes to render distinct
-subframes, meaning that each tab has multiple connected processes. </p>
+subframes, meaning that each tab has multiple connected processes.</p>
 <p>Components will need to adapt their IPC code to work in this new world, both by
 updating their use of existing APIs, and by adapting to use new Actors and APIs
 which are being added as part of the Fission project.</p>
@@ -229,14 +248,14 @@ the same underlying transport.</p>
 Fission over the coming months, but am not quite ready to commit to a weekly or
 bi-weekly newsletter schedule.</p>
 <p>If you're interested in helping out with the newsletter, please reach out and
-let me know!.</p>
+let me (Nika) know!.</p>
 <h3>TL;DR</h3>
 <p>Fission is happening and our first "Milestone" is targeted at the end of
 February. Please file bugs related to fission and mark them as "Fission
 Milestone: ?" so we can triage them into the correct milestone.</p>
 <hr>
 <p><em>Thanks for reading, and best of luck splitting the atom!</em></p>
-<p>-Nika</p>
+<p><a href="https://wiki.mozilla.org/Project_Fission#Team">The Project Fission Team</a></p>
 
 <footer class="footer">
     <h1 class="content-subhead">About Nika</h1>
