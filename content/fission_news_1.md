@@ -5,7 +5,6 @@ Category: mozilla
 Tags: mozilla, firefox, gecko, fission
 Slug: fission-news-1
 Authors: Nika Layzell
-Status: draft
 
 > **TL;DR** Fission is happening and our first "Milestone" is targeted at
 > the end of February. Please file bugs related to fission and mark them as
@@ -279,3 +278,5 @@ let me (Nika) know!.
 [Bug 1322426]: https://bugzilla.mozilla.org/show_bug.cgi?id=1322426
 [current Milestone 1 status]: https://bugzilla.mozilla.org/buglist.cgi?classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&classification=Other&f1=cf_fission_milestone&list_id=14538804&o1=equals&query_format=advanced&v1=M1&query_based_on=&columnlist=product%2Ccomponent%2Cassigned_to%2Cshort_desc%2Cbug_status%2Cresolution%2Cstatus_whiteboard
 [The Project Fission Team]: https://wiki.mozilla.org/Project_Fission#Team
+[PWindowGlobal]: https://searchfox.org/mozilla-central/rev/60c4067b1cbb0f94d7dc2d7cdfa27ed579817fee/dom/ipc/PWindowGlobal.ipdl
+[JS Window Actor]: https://bugzilla.mozilla.org/show_bug.cgi?id=1467212
