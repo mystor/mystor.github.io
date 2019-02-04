@@ -73,9 +73,9 @@ limited to, the following contributions:&lt;/p&gt;
 &lt;/ul&gt;
 &lt;p&gt;If you want an up-to-date view of Milestone 1, you can see the &lt;a href="https://bugzilla.mozilla.org/buglist.cgi?classification=Client%20Software&amp;amp;classification=Developer%20Infrastructure&amp;amp;classification=Components&amp;amp;classification=Server%20Software&amp;amp;classification=Other&amp;amp;f1=cf_fission_milestone&amp;amp;list_id=14538804&amp;amp;o1=equals&amp;amp;query_format=advanced&amp;amp;v1=M1&amp;amp;query_based_on=&amp;amp;columnlist=product%2Ccomponent%2Cassigned_to%2Cshort_desc%2Cbug_status%2Cresolution%2Cstatus_whiteboard"&gt;current Milestone 1 status&lt;/a&gt;
 on Bugzilla.&lt;/p&gt;
-&lt;p&gt;If have a bug which may be relevant to fission, &lt;em&gt;please&lt;/em&gt; let us know by setting
-the "Fission Milestone" project flag to '?'. We'll swing by and triage it into
-the correct milestone.&lt;/p&gt;
+&lt;p&gt;If you have a bug which may be relevant to fission, &lt;em&gt;please&lt;/em&gt; let us know by
+setting the "Fission Milestone" project flag to '?'. We'll swing by and
+triage it into the correct milestone.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Setting Fission Milestone Project Flag" src="https://mystor.github.io/images/fission_milestone_select.png"&gt;&lt;/p&gt;
 &lt;p&gt;If you have any questions, feel free to reach out to one of us, and we'll get
 you answers, or guide you to someone who can:&lt;/p&gt;
