@@ -83,9 +83,9 @@ limited to, the following contributions:
 If you want an up-to-date view of Milestone 1, you can see the [current Milestone 1 status]
 on Bugzilla.
 
-If have a bug which may be relevant to fission, *please* let us know by setting
-the "Fission Milestone" project flag to '?'. We'll swing by and triage it into
-the correct milestone.
+If you have a bug which may be relevant to fission, *please* let us know by
+setting the "Fission Milestone" project flag to '?'. We'll swing by and
+triage it into the correct milestone.
 
 ![Setting Fission Milestone Project Flag]({attach}images/fission_milestone_select.png)
 
