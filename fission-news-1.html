@@ -144,14 +144,14 @@ which are being added as part of the Fission project.</p>
 <p>For many components, the full tree of Browsing Contexts is not important,
 rather communication is needed between the parent process and any specific
 document. For these cases, a new actor has been added which is exposed both in
-C++ code and JS code called [PWindowGlobal].</p>
+C++ code and JS code called <a href="https://searchfox.org/mozilla-central/rev/60c4067b1cbb0f94d7dc2d7cdfa27ed579817fee/dom/ipc/PWindowGlobal.ipdl">PWindowGlobal</a>.</p>
 <p>Unlike other actors in gecko, such as <code>Tab{Parent,Child}</code>, this actor exists
 for all window globals, including those loaded within the parent process. This
 is handled using a new <code>PInProcess</code> manager actor, which supports sending main
 thread to main thread IPDL messages.</p>
 <p>JS code running within a FrameScript may not be able to inspect every frame at
 once, and won't be able to handle events from out of process iframes. Instead,
-it will need to use our new [JS Window Actor] APIs, which we are targeting to
+it will need to use our new <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1467212">JS Window Actor</a> APIs, which we are targeting to
 land in Milestone 1. These actors are "managed" by the <code>WindowGlobal</code> actors,
 and are implemented as JS classes instantiated when requested for any
 particular window. They support sending async messages, and will be present for
