@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>Nika's Box - mozilla</title><link>https://mystor.github.io/</link><description></description><lastBuildDate>Mon, 04 Feb 2019 09:00:00 -0500</lastBuildDate><item><title>Fission Engineering Newsletter #1</title><link>https://mystor.github.io/fission-news-1.html</link><description>&lt;blockquote&gt;
+<rss version="2.0"><channel><title>Nika's Box - mozilla</title><link>https://mystor.github.io/</link><description></description><lastBuildDate>Mon, 04 Feb 2019 13:45:00 -0500</lastBuildDate><item><title>Fission Engineering Newsletter #1</title><link>https://mystor.github.io/fission-news-1.html</link><description>&lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;TL;DR&lt;/strong&gt; Fission is happening and our first "Milestone" is targeted at
 the end of February. Please file bugs related to fission and mark them as
 "Fission Milestone: ?" so we can triage them into the correct milestone.&lt;/p&gt;

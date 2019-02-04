@@ -141,17 +141,6 @@ pre {
     right: 0;
 }
 
-.cursor {
-    font-size: 125%;
-    animation: cursor 1s linear infinite;
-}
-
-@keyframes cursor {
-    50% {
-        opacity: .3;
-    }
-}
-
 .command {
     text-transform: lowercase;
 }
