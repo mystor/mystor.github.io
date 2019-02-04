@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nika's Box, Random stuff in C++ and Rust.">
+
+        <link rel="alternate"  href="https://mystor.github.io/feeds/all.atom.xml" type="application/atom+xml" title="Nika's Box Full Atom Feed"/>
+        <link rel="alternate" href="https://mystor.github.io/feeds/all.rss.xml" type="application/rss+xml" title="Nika's Box Full RSS Feed"/>
+
+        <title>NIKA:\fission-news-1\></title>
+
+
+    <link rel="stylesheet" href="https://mystor.github.io/theme/css/nika2k.css">
+    <!-- silly twitter stuff 'cause why not -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@kneecaw">
+    <meta name="twitter:title" content="Fission Engineering Newsletter #1">
+    <meta name="twitter:description" content="NIKA:\fission-news-1\> _">
+
+    <!-- gotta have that nice syntax highlighting~ -->
+    <link rel="stylesheet" href="https://mystor.github.io/theme/css/pygments.css">
+</head>
+
+<body>
+    <div id="layout">
+        <div class="content">
+            <h1 class="content-subhead">
+                <a class="post-category" href="https://mystor.github.io">NIKA:\</a><a href="#" class="post-category">fission-news-1\</a>>
+                <span class="command">list<span class="cursor">❚</span></span>
+            </h1>
+
+    <section class="post">
+        <header class="post-header">
+            <h1>Fission Engineering Newsletter #1</h1>
+            <p class="post-meta">
+                Mon 04 February 2019 &middot;                     <a class="post-category" href="https://mystor.github.io/tag/mozilla.html">mozilla</a>
+                    <a class="post-category" href="https://mystor.github.io/tag/firefox.html">firefox</a>
+                    <a class="post-category" href="https://mystor.github.io/tag/gecko.html">gecko</a>
+                    <a class="post-category" href="https://mystor.github.io/tag/fission.html">fission</a>
+            </p>
+        </header>
+    </section>
+    <blockquote>
+<p><strong>TL;DR</strong> Fission is happening and our first "Milestone" is targeted at
+the end of February. Please file bugs related to fission and mark them as
+"Fission Milestone: ?" so we can triage them into the correct milestone.</p>
+</blockquote>
+<p>A little than more a year ago, a serious security flaw affecting almost all
+modern processors was <a href="https://googleprojectzero.blogspot.com/2018/01/reading-privileged-memory-with-side.html">publicly disclosed</a>. Three known variants of the issue
+were announced with the names dubbed as <a href="https://spectreattack.com/spectre.pdf">Spectre</a> (variants 1 and 2) and
+<a href="https://meltdownattack.com/meltdown.pdf">Meltdown</a> (variant 3). Spectre abuses a CPU optimization technique known
+as speculative execution to exfiltrate secret data stored in memory of other
+running programs via side channels. This might include cryptographic keys,
+passwords stored in a password manager or browser, cookies, etc. This timing
+attack posed a serious threat to the browsers because webpages often serve
+JavaScript from multiple domains that run in the same process. This
+vulnerability would enable malicious third-party code to steal sensitive user
+data belonging to a site hosting that code, a serious flaw that would violate
+a web security cornerstone known as <a href="https://en.m.wikipedia.org/wiki/Same-origin_policy">Same-origin policy</a>.</p>
+<p>Thanks to the heroic efforts of the Firefox JS and Security teams, we were
+able to mitigate these vulnerabilities right away. However, these mitigations
+may not save us in the future if another security vulnerability is released
+exploiting the same underlying problem of sharing processes (and hence,
+memory) between different domains, some of which may be malicious. Chrome
+spent multiple years working to isolate sites in their own processes.</p>
+<p>We aim to build a browser which isn't just secure against known security
+vulnerabilities, but also has layers of built-in defense against potential
+future vulnerabilities. To accomplish this, we need to revamp the
+architecture of Firefox and support full Site Isolation. We call this next
+step in the evolution of Firefox’s process model "<strong>Project Fission</strong>". While
+Electrolysis split our browser into Content and Chrome, with Fission, we will
+"split the atom", splitting cross-site iframes into different processes than
+their parent frame.</p>
+<p>Over the last year, we have been working to lay the groundwork for Fission,
+designing new infrastructure. In the coming weeks and months, we’ll need help
+from all Firefox teams to adapt our code to a post-Fission browser
+architecture.</p>
+<h3>Planning and Coordination</h3>
+<p>Fission is a massive project, spanning across many different teams, so keeping
+track of what everyone is doing is a pretty big task. While we have a weekly
+project meeting, which someone on your team may already be attending, we have
+started also using a Bugzilla project tracking flag to keep track of the work
+we have in progress.</p>
+<p>Now that we've moved past much of the initial infrastructure ground work, we
+are going to keep track of work with our milestone targets. Each milestone
+will contain a collection of new features and improved functionality which
+brings us incrementally closer to our goal.</p>
+<p>Our first milestone, "Milestone 1" (clever, I know), is currently targeted
+for the end of February. In Milestone 1, we plan to have the groundwork for
+out-of-process iframes, which encompasses some major work, including, but not
+limited to, the following contributions:</p>
+<ul>
+<li><strong>:rhunt</strong> is implementing basic out-of-process iframe rendering behind a
+  pref. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1500257">Bug 1500257</a>)</li>
+<li><strong>:jdai</strong> is implementing native JS Window Actor APIs to migrate FrameScripts.
+  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1467212">Bug 1467212</a>)</li>
+<li><strong>:farre</strong> is adding support for BrowsingContext fields to be
+  synchronized between multiple content processes. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1523645">Bug 1523645</a>)</li>
+<li><strong>:peterv</strong> has implemented new cross-process WindowProxy objects to
+  correctly emulate the <code>Window</code> object APIs exposed to cross-origin documents.
+  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1353867">Bug 1353867</a>)</li>
+<li><strong>:mattn</strong> is converting the FormAutoFillListeners code to the actors infrastructure. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1474143">Bug 1474143</a>)</li>
+<li><strong>:felipe</strong> simulated the Fission API for communicating between parent and child processes. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1493984">Bug 1493984</a>)</li>
+<li><strong>:heycam</strong> is working on sharing UA stylesheets between processes. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1474793">Bug 1474793</a>)</li>
+<li><strong>:kmag</strong>, <strong>:erahm</strong> and many others have reduced per-process memory overhead!</li>
+<li><strong>:jld</strong> is working on async process launches</li>
+<li><strong>:dragana</strong>, <strong>:kershaw</strong> and others are moving networking logic into a socket process. (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1322426">Bug 1322426</a>)</li>
+<li>...and so much more!</li>
+</ul>
+<p>If you want an up-to-date view of Milestone 1, you can see the <a href="https://bugzilla.mozilla.org/buglist.cgi?classification=Client%20Software&amp;classification=Developer%20Infrastructure&amp;classification=Components&amp;classification=Server%20Software&amp;classification=Other&amp;f1=cf_fission_milestone&amp;list_id=14538804&amp;o1=equals&amp;query_format=advanced&amp;v1=M1&amp;query_based_on=&amp;columnlist=product%2Ccomponent%2Cassigned_to%2Cshort_desc%2Cbug_status%2Cresolution%2Cstatus_whiteboard">current Milestone 1 status</a>
+on Bugzilla.</p>
+<p>If have a bug which may be relevant to fission, <em>please</em> let us know by setting
+the "Fission Milestone" project flag to '?'. We'll swing by and triage it into
+the correct milestone.</p>
+<p><img alt="Setting Fission Milestone Project Flag" src="https://mystor.github.io/images/fission_milestone_select.png"></p>
+<p>If you have any questions, feel free to reach out to one of us, and we'll get
+you answers, or guide you to someone who can:</p>
+<ul>
+<li>Ron Manning <code>&lt;rmanning@mozilla.com&gt;</code> (Fission Engineering Project Manager)</li>
+<li>Nika Layzell <code>&lt;nika@mozilla.com&gt;</code> (Fission Tech Lead)</li>
+<li>Neha Kochar <code>&lt;nkochar@mozilla.com&gt;</code> (DOM Fission Engineering Manager)</li>
+</ul>
+<h3>What's Changing?</h3>
+<p>In order to make each component of Firefox successfully adapt to a post-Fission
+world, many of them are going to need changes of varying scale. Covering all of
+the changes which we're going to need would be impossible within a single
+newsletter. Instead, I will focus on the changes to actors, messageManagers,
+and document hierarchies.</p>
+<p>Today, Firefox has process separation between the UI - run in the <em>parent
+process</em>, and web content - run in <em>content processes</em>. Communication between
+these two trees of "Browsing Contexts" is done using the <code>TabParent</code> and
+<code>TabChild</code> actors in C++ code, and Message Managers in JS code. These systems
+communicate directly between the "embedder", which in this case is the
+<code>&lt;browser&gt;</code> element, and the root of the embedded tree, which in this case
+would be the toplevel DocShell in the tab.</p>
+<p>However, in a post-Fission world, this layer for communication is no longer
+sufficient. It will be possible for multiple processes to render distinct
+subframes, meaning that each tab has multiple connected processes.</p>
+<p>Components will need to adapt their IPC code to work in this new world, both by
+updating their use of existing APIs, and by adapting to use new Actors and APIs
+which are being added as part of the Fission project.</p>
+<h4>Per-Window Global Actors</h4>
+<p>For many components, the full tree of Browsing Contexts is not important,
+rather communication is needed between the parent process and any specific
+document. For these cases, a new actor has been added which is exposed both in
+C++ code and JS code called [PWindowGlobal].</p>
+<p>Unlike other actors in gecko, such as <code>Tab{Parent,Child}</code>, this actor exists
+for all window globals, including those loaded within the parent process. This
+is handled using a new <code>PInProcess</code> manager actor, which supports sending main
+thread to main thread IPDL messages.</p>
+<p>JS code running within a FrameScript may not be able to inspect every frame at
+once, and won't be able to handle events from out of process iframes. Instead,
+it will need to use our new [JS Window Actor] APIs, which we are targeting to
+land in Milestone 1. These actors are "managed" by the <code>WindowGlobal</code> actors,
+and are implemented as JS classes instantiated when requested for any
+particular window. They support sending async messages, and will be present for
+both in-process and out-of-process windows.</p>
+<p>C++ logic which walks the frame tree from the <code>TabChild</code> may stop working.
+Instead, C++ code may choose to use the PWindowGlobal actor to send messages in
+a manner similar to JS code.</p>
+<h4><code>BrowsingContext</code> objects</h4>
+<p>C++ code may also maintain shared state on the <code>BrowsingContext</code> object. We are
+targeting landing the field syncing infrastructure in Milestone 1, and it will
+provide a place to store data which should be readable by all processes with a
+view of the structure.</p>
+<p>The parent process holds a special subclass of the <code>BrowsingContext</code> object:
+<code>CanonicalBrowsingContext</code>. This object has extra fields which can be used in
+the parent to keep track of the current status of all frames in one place.</p>
+<h4><code>TabParent</code>, <code>TabChild</code> and IFrames</h4>
+<p>The <code>Tab{Parent,Child}</code> actors will continue to exist, and will always bridge
+from the parent process to a content process. However, in addition to these
+actors being present for toplevel documents, they will also be present for
+out-of-process subtrees.</p>
+<p>As an example, consider the following tree of nested browsing contexts:</p>
+<div class="highlight"><pre><span></span>         +-- 1 --+
+         | a.com |
+         +-------+
+          /     \
+    +-- 2 --+ +-- 4 --+
+    | a.com | | b.com |
+    +-------+ +-------+
+        |         |
+    +-- 3 --+ +-- 5 --+
+    | b.com | | b.com |
+    +-------+ +-------+
+</pre></div>
+
+
+<p>Under e10s, we have a single <code>Tab{Parent,Child}</code> pair for the entire tab, which
+would connect to <code>1</code>, and FrameScripts would run with <code>content</code> being the <code>1</code>'s
+global.</p>
+<p>After Fission, there will still be a <code>Tab{Parent,Child}</code> actor for the root of
+the tree, at <code>1</code>. However, there will also be two additional <code>Tab{Parent,Child}</code>
+actors: one at <code>3</code> and one at <code>4</code>. Each of these nested <code>TabParent</code> objects are
+held alive in the parent process by a <code>RemoteFrameParent</code> actor whose
+corresponding <code>RemoteFrameChild</code> is held by the embedder's iframe.</p>
+<p>The following is a diagram of the documents and actors which build up the actor
+tree, excluding the <code>WindowGlobal</code> actors. <code>RF{P,C}</code> stands for
+<code>RemoteFrame{Parent,Child}</code>, and <code>T{P,C}</code> stands for <code>Tab{Parent,Child}</code>.
+The <code>RemoteFrame</code> actors are managed by their embedding <code>Tab</code> actors, and use
+the same underlying transport.</p>
+<div class="highlight"><pre><span></span>- within a.com&#39;s process -
+
+         +-------+
+         | TC: 1 |
+         +-------+
+             |
+         +-- 1 --+
+         | a.com |
+         +-------+
+          /     \
+    +-- 2 --+ +-------+
+    | a.com | | RFC:2 |
+    +-------+ +-------+
+        |
+    +-------+
+    | RFC:1 |
+    +-------+
+
+- within b.com&#39;s process -
+
+    +-------+    +-------+
+    | TC: 2 |    | TC: 3 |
+    +-------+    +-------+
+        |            |
+    +-- 3 --+    +-- 4 --+
+    | b.com |    | b.com |
+    +-------+    +-------+
+                     |
+                 +-- 5 --+
+                 | b.com |
+                 +-------+
+
+- within the parent process -
+
+         +-------+
+         | TP: 1 |
+         +-------+
+          /     \    (manages)
+    +-------+ +-------+
+    | RFP:1 | | RFP:2 |
+    +-------+ +-------+
+        |         |
+    +-------+ +-------+
+    | TP: 2 | | TP: 3 |
+    +-------+ +-------+
+</pre></div>
+
+
+<h3>This Newsletter</h3>
+<p>I hope to begin keeping everyone updated on the latest developments with
+Fission over the coming months, but am not quite ready to commit to a weekly or
+bi-weekly newsletter schedule.</p>
+<p>If you're interested in helping out with the newsletter, please reach out and
+let me (Nika) know!.</p>
+<hr>
+<p><em>Thanks for reading, and best of luck splitting the atom!</em></p>
+<p><a href="https://wiki.mozilla.org/Project_Fission#Team">The Project Fission Team</a></p>
+
+<footer class="footer">
+    <h1 class="content-subhead">About Nika</h1>
+    <p>
+        <strong>Nika Layzell</strong> is a platform engineer working on Gecko, the engine powering
+        <a href="https://firefox.com/">Firefox</a>.<br> In her spare time, she
+        makes a fool of herself on the internet, and breaks otherwise functional
+        software.
+    </p>
+    <p>
+        <a href="https://github.com/mystor/">github\</a> &middot;
+        <a href="https://twitter.com/kneecaw/">twitter\</a> &middot;
+        <a href="https://mystor.github.io/archives.html">archives\</a> &middot;
+        <a href="https://mystor.github.io/categories.html">categories\</a> &middot;
+        <a href="https://mystor.github.io/tags.html">tags\</a> &middot;
+        <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>
+    </p>
+</footer>        </div>
+    </div>
+</body>
+</html>

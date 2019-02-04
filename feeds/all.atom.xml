@@ -1,5 +1,225 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Nika's Box</title><link href="https://mystor.github.io/" rel="alternate"></link><link href="https://mystor.github.io/feeds/all.atom.xml" rel="self"></link><id>https://mystor.github.io/</id><updated>2018-11-24T12:00:00-05:00</updated><entry><title>Partially Generated Classes in C++</title><link href="https://mystor.github.io/partial-cxx-codegen.html" rel="alternate"></link><published>2018-11-24T12:00:00-05:00</published><updated>2018-11-24T12:00:00-05:00</updated><author><name>Nika Layzell</name></author><id>tag:mystor.github.io,2018-11-24:/partial-cxx-codegen.html</id><summary type="html">&lt;p&gt;An interesting problem which I've seen come up decently often in C++ code generators is how to deal with what I'm calling "partially generated classes". We want to generate methods and members for a class which call other methods on that class added by the implementation.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Nika's Box</title><link href="https://mystor.github.io/" rel="alternate"></link><link href="https://mystor.github.io/feeds/all.atom.xml" rel="self"></link><id>https://mystor.github.io/</id><updated>2019-02-04T00:00:00-05:00</updated><entry><title>Fission Engineering Newsletter #1</title><link href="https://mystor.github.io/fission-news-1.html" rel="alternate"></link><published>2019-02-04T00:00:00-05:00</published><updated>2019-02-04T00:00:00-05:00</updated><author><name>Nika Layzell</name></author><id>tag:mystor.github.io,2019-02-04:/fission-news-1.html</id><summary type="html">&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;TL;DR&lt;/strong&gt; Fission is happening and our first "Milestone" is targeted at
+the end of February. Please file bugs related to fission and mark them as
+"Fission Milestone: ?" so we can triage them into the correct milestone.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;A little than more a year ago, a serious security flaw affecting almost …&lt;/p&gt;</summary><content type="html">&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;TL;DR&lt;/strong&gt; Fission is happening and our first "Milestone" is targeted at
+the end of February. Please file bugs related to fission and mark them as
+"Fission Milestone: ?" so we can triage them into the correct milestone.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;A little than more a year ago, a serious security flaw affecting almost all
+modern processors was &lt;a href="https://googleprojectzero.blogspot.com/2018/01/reading-privileged-memory-with-side.html"&gt;publicly disclosed&lt;/a&gt;. Three known variants of the issue
+were announced with the names dubbed as &lt;a href="https://spectreattack.com/spectre.pdf"&gt;Spectre&lt;/a&gt; (variants 1 and 2) and
+&lt;a href="https://meltdownattack.com/meltdown.pdf"&gt;Meltdown&lt;/a&gt; (variant 3). Spectre abuses a CPU optimization technique known
+as speculative execution to exfiltrate secret data stored in memory of other
+running programs via side channels. This might include cryptographic keys,
+passwords stored in a password manager or browser, cookies, etc. This timing
+attack posed a serious threat to the browsers because webpages often serve
+JavaScript from multiple domains that run in the same process. This
+vulnerability would enable malicious third-party code to steal sensitive user
+data belonging to a site hosting that code, a serious flaw that would violate
+a web security cornerstone known as &lt;a href="https://en.m.wikipedia.org/wiki/Same-origin_policy"&gt;Same-origin policy&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Thanks to the heroic efforts of the Firefox JS and Security teams, we were
+able to mitigate these vulnerabilities right away. However, these mitigations
+may not save us in the future if another security vulnerability is released
+exploiting the same underlying problem of sharing processes (and hence,
+memory) between different domains, some of which may be malicious. Chrome
+spent multiple years working to isolate sites in their own processes.&lt;/p&gt;
+&lt;p&gt;We aim to build a browser which isn't just secure against known security
+vulnerabilities, but also has layers of built-in defense against potential
+future vulnerabilities. To accomplish this, we need to revamp the
+architecture of Firefox and support full Site Isolation. We call this next
+step in the evolution of Firefox’s process model "&lt;strong&gt;Project Fission&lt;/strong&gt;". While
+Electrolysis split our browser into Content and Chrome, with Fission, we will
+"split the atom", splitting cross-site iframes into different processes than
+their parent frame.&lt;/p&gt;
+&lt;p&gt;Over the last year, we have been working to lay the groundwork for Fission,
+designing new infrastructure. In the coming weeks and months, we’ll need help
+from all Firefox teams to adapt our code to a post-Fission browser
+architecture.&lt;/p&gt;
+&lt;h3&gt;Planning and Coordination&lt;/h3&gt;
+&lt;p&gt;Fission is a massive project, spanning across many different teams, so keeping
+track of what everyone is doing is a pretty big task. While we have a weekly
+project meeting, which someone on your team may already be attending, we have
+started also using a Bugzilla project tracking flag to keep track of the work
+we have in progress.&lt;/p&gt;
+&lt;p&gt;Now that we've moved past much of the initial infrastructure ground work, we
+are going to keep track of work with our milestone targets. Each milestone
+will contain a collection of new features and improved functionality which
+brings us incrementally closer to our goal.&lt;/p&gt;
+&lt;p&gt;Our first milestone, "Milestone 1" (clever, I know), is currently targeted
+for the end of February. In Milestone 1, we plan to have the groundwork for
+out-of-process iframes, which encompasses some major work, including, but not
+limited to, the following contributions:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;:rhunt&lt;/strong&gt; is implementing basic out-of-process iframe rendering behind a
+  pref. (&lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1500257"&gt;Bug 1500257&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;:jdai&lt;/strong&gt; is implementing native JS Window Actor APIs to migrate FrameScripts.
+  (&lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1467212"&gt;Bug 1467212&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;:farre&lt;/strong&gt; is adding support for BrowsingContext fields to be
+  synchronized between multiple content processes. (&lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1523645"&gt;Bug 1523645&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;:peterv&lt;/strong&gt; has implemented new cross-process WindowProxy objects to
+  correctly emulate the &lt;code&gt;Window&lt;/code&gt; object APIs exposed to cross-origin documents.
+  (&lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1353867"&gt;Bug 1353867&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;:mattn&lt;/strong&gt; is converting the FormAutoFillListeners code to the actors infrastructure. (&lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1474143"&gt;Bug 1474143&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;:felipe&lt;/strong&gt; simulated the Fission API for communicating between parent and child processes. (&lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1493984"&gt;Bug 1493984&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;:heycam&lt;/strong&gt; is working on sharing UA stylesheets between processes. (&lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1474793"&gt;Bug 1474793&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;:kmag&lt;/strong&gt;, &lt;strong&gt;:erahm&lt;/strong&gt; and many others have reduced per-process memory overhead!&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;:jld&lt;/strong&gt; is working on async process launches&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;:dragana&lt;/strong&gt;, &lt;strong&gt;:kershaw&lt;/strong&gt; and others are moving networking logic into a socket process. (&lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1322426"&gt;Bug 1322426&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;...and so much more!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If you want an up-to-date view of Milestone 1, you can see the &lt;a href="https://bugzilla.mozilla.org/buglist.cgi?classification=Client%20Software&amp;amp;classification=Developer%20Infrastructure&amp;amp;classification=Components&amp;amp;classification=Server%20Software&amp;amp;classification=Other&amp;amp;f1=cf_fission_milestone&amp;amp;list_id=14538804&amp;amp;o1=equals&amp;amp;query_format=advanced&amp;amp;v1=M1&amp;amp;query_based_on=&amp;amp;columnlist=product%2Ccomponent%2Cassigned_to%2Cshort_desc%2Cbug_status%2Cresolution%2Cstatus_whiteboard"&gt;current Milestone 1 status&lt;/a&gt;
+on Bugzilla.&lt;/p&gt;
+&lt;p&gt;If have a bug which may be relevant to fission, &lt;em&gt;please&lt;/em&gt; let us know by setting
+the "Fission Milestone" project flag to '?'. We'll swing by and triage it into
+the correct milestone.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Setting Fission Milestone Project Flag" src="https://mystor.github.io/images/fission_milestone_select.png"&gt;&lt;/p&gt;
+&lt;p&gt;If you have any questions, feel free to reach out to one of us, and we'll get
+you answers, or guide you to someone who can:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Ron Manning &lt;code&gt;&amp;lt;rmanning@mozilla.com&amp;gt;&lt;/code&gt; (Fission Engineering Project Manager)&lt;/li&gt;
+&lt;li&gt;Nika Layzell &lt;code&gt;&amp;lt;nika@mozilla.com&amp;gt;&lt;/code&gt; (Fission Tech Lead)&lt;/li&gt;
+&lt;li&gt;Neha Kochar &lt;code&gt;&amp;lt;nkochar@mozilla.com&amp;gt;&lt;/code&gt; (DOM Fission Engineering Manager)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;What's Changing?&lt;/h3&gt;
+&lt;p&gt;In order to make each component of Firefox successfully adapt to a post-Fission
+world, many of them are going to need changes of varying scale. Covering all of
+the changes which we're going to need would be impossible within a single
+newsletter. Instead, I will focus on the changes to actors, messageManagers,
+and document hierarchies.&lt;/p&gt;
+&lt;p&gt;Today, Firefox has process separation between the UI - run in the &lt;em&gt;parent
+process&lt;/em&gt;, and web content - run in &lt;em&gt;content processes&lt;/em&gt;. Communication between
+these two trees of "Browsing Contexts" is done using the &lt;code&gt;TabParent&lt;/code&gt; and
+&lt;code&gt;TabChild&lt;/code&gt; actors in C++ code, and Message Managers in JS code. These systems
+communicate directly between the "embedder", which in this case is the
+&lt;code&gt;&amp;lt;browser&amp;gt;&lt;/code&gt; element, and the root of the embedded tree, which in this case
+would be the toplevel DocShell in the tab.&lt;/p&gt;
+&lt;p&gt;However, in a post-Fission world, this layer for communication is no longer
+sufficient. It will be possible for multiple processes to render distinct
+subframes, meaning that each tab has multiple connected processes.&lt;/p&gt;
+&lt;p&gt;Components will need to adapt their IPC code to work in this new world, both by
+updating their use of existing APIs, and by adapting to use new Actors and APIs
+which are being added as part of the Fission project.&lt;/p&gt;
+&lt;h4&gt;Per-Window Global Actors&lt;/h4&gt;
+&lt;p&gt;For many components, the full tree of Browsing Contexts is not important,
+rather communication is needed between the parent process and any specific
+document. For these cases, a new actor has been added which is exposed both in
+C++ code and JS code called [PWindowGlobal].&lt;/p&gt;
+&lt;p&gt;Unlike other actors in gecko, such as &lt;code&gt;Tab{Parent,Child}&lt;/code&gt;, this actor exists
+for all window globals, including those loaded within the parent process. This
+is handled using a new &lt;code&gt;PInProcess&lt;/code&gt; manager actor, which supports sending main
+thread to main thread IPDL messages.&lt;/p&gt;
+&lt;p&gt;JS code running within a FrameScript may not be able to inspect every frame at
+once, and won't be able to handle events from out of process iframes. Instead,
+it will need to use our new [JS Window Actor] APIs, which we are targeting to
+land in Milestone 1. These actors are "managed" by the &lt;code&gt;WindowGlobal&lt;/code&gt; actors,
+and are implemented as JS classes instantiated when requested for any
+particular window. They support sending async messages, and will be present for
+both in-process and out-of-process windows.&lt;/p&gt;
+&lt;p&gt;C++ logic which walks the frame tree from the &lt;code&gt;TabChild&lt;/code&gt; may stop working.
+Instead, C++ code may choose to use the PWindowGlobal actor to send messages in
+a manner similar to JS code.&lt;/p&gt;
+&lt;h4&gt;&lt;code&gt;BrowsingContext&lt;/code&gt; objects&lt;/h4&gt;
+&lt;p&gt;C++ code may also maintain shared state on the &lt;code&gt;BrowsingContext&lt;/code&gt; object. We are
+targeting landing the field syncing infrastructure in Milestone 1, and it will
+provide a place to store data which should be readable by all processes with a
+view of the structure.&lt;/p&gt;
+&lt;p&gt;The parent process holds a special subclass of the &lt;code&gt;BrowsingContext&lt;/code&gt; object:
+&lt;code&gt;CanonicalBrowsingContext&lt;/code&gt;. This object has extra fields which can be used in
+the parent to keep track of the current status of all frames in one place.&lt;/p&gt;
+&lt;h4&gt;&lt;code&gt;TabParent&lt;/code&gt;, &lt;code&gt;TabChild&lt;/code&gt; and IFrames&lt;/h4&gt;
+&lt;p&gt;The &lt;code&gt;Tab{Parent,Child}&lt;/code&gt; actors will continue to exist, and will always bridge
+from the parent process to a content process. However, in addition to these
+actors being present for toplevel documents, they will also be present for
+out-of-process subtrees.&lt;/p&gt;
+&lt;p&gt;As an example, consider the following tree of nested browsing contexts:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;         +-- 1 --+
+         | a.com |
+         +-------+
+          /     \
+    +-- 2 --+ +-- 4 --+
+    | a.com | | b.com |
+    +-------+ +-------+
+        |         |
+    +-- 3 --+ +-- 5 --+
+    | b.com | | b.com |
+    +-------+ +-------+
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Under e10s, we have a single &lt;code&gt;Tab{Parent,Child}&lt;/code&gt; pair for the entire tab, which
+would connect to &lt;code&gt;1&lt;/code&gt;, and FrameScripts would run with &lt;code&gt;content&lt;/code&gt; being the &lt;code&gt;1&lt;/code&gt;'s
+global.&lt;/p&gt;
+&lt;p&gt;After Fission, there will still be a &lt;code&gt;Tab{Parent,Child}&lt;/code&gt; actor for the root of
+the tree, at &lt;code&gt;1&lt;/code&gt;. However, there will also be two additional &lt;code&gt;Tab{Parent,Child}&lt;/code&gt;
+actors: one at &lt;code&gt;3&lt;/code&gt; and one at &lt;code&gt;4&lt;/code&gt;. Each of these nested &lt;code&gt;TabParent&lt;/code&gt; objects are
+held alive in the parent process by a &lt;code&gt;RemoteFrameParent&lt;/code&gt; actor whose
+corresponding &lt;code&gt;RemoteFrameChild&lt;/code&gt; is held by the embedder's iframe.&lt;/p&gt;
+&lt;p&gt;The following is a diagram of the documents and actors which build up the actor
+tree, excluding the &lt;code&gt;WindowGlobal&lt;/code&gt; actors. &lt;code&gt;RF{P,C}&lt;/code&gt; stands for
+&lt;code&gt;RemoteFrame{Parent,Child}&lt;/code&gt;, and &lt;code&gt;T{P,C}&lt;/code&gt; stands for &lt;code&gt;Tab{Parent,Child}&lt;/code&gt;.
+The &lt;code&gt;RemoteFrame&lt;/code&gt; actors are managed by their embedding &lt;code&gt;Tab&lt;/code&gt; actors, and use
+the same underlying transport.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;- within a.com&amp;#39;s process -
+
+         +-------+
+         | TC: 1 |
+         +-------+
+             |
+         +-- 1 --+
+         | a.com |
+         +-------+
+          /     \
+    +-- 2 --+ +-------+
+    | a.com | | RFC:2 |
+    +-------+ +-------+
+        |
+    +-------+
+    | RFC:1 |
+    +-------+
+
+- within b.com&amp;#39;s process -
+
+    +-------+    +-------+
+    | TC: 2 |    | TC: 3 |
+    +-------+    +-------+
+        |            |
+    +-- 3 --+    +-- 4 --+
+    | b.com |    | b.com |
+    +-------+    +-------+
+                     |
+                 +-- 5 --+
+                 | b.com |
+                 +-------+
+
+- within the parent process -
+
+         +-------+
+         | TP: 1 |
+         +-------+
+          /     \    (manages)
+    +-------+ +-------+
+    | RFP:1 | | RFP:2 |
+    +-------+ +-------+
+        |         |
+    +-------+ +-------+
+    | TP: 2 | | TP: 3 |
+    +-------+ +-------+
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;This Newsletter&lt;/h3&gt;
+&lt;p&gt;I hope to begin keeping everyone updated on the latest developments with
+Fission over the coming months, but am not quite ready to commit to a weekly or
+bi-weekly newsletter schedule.&lt;/p&gt;
+&lt;p&gt;If you're interested in helping out with the newsletter, please reach out and
+let me (Nika) know!.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;Thanks for reading, and best of luck splitting the atom!&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://wiki.mozilla.org/Project_Fission#Team"&gt;The Project Fission Team&lt;/a&gt;&lt;/p&gt;</content><category term="mozilla"></category><category term="firefox"></category><category term="gecko"></category><category term="fission"></category></entry><entry><title>Partially Generated Classes in C++</title><link href="https://mystor.github.io/partial-cxx-codegen.html" rel="alternate"></link><published>2018-11-24T12:00:00-05:00</published><updated>2018-11-24T12:00:00-05:00</updated><author><name>Nika Layzell</name></author><id>tag:mystor.github.io,2018-11-24:/partial-cxx-codegen.html</id><summary type="html">&lt;p&gt;An interesting problem which I've seen come up decently often in C++ code generators is how to deal with what I'm calling "partially generated classes". We want to generate methods and members for a class which call other methods on that class added by the implementation.&lt;/p&gt;
 &lt;h2&gt;Potential Solutions&lt;/h2&gt;
 &lt;p&gt;I'm not …&lt;/p&gt;</summary><content type="html">&lt;p&gt;An interesting problem which I've seen come up decently often in C++ code generators is how to deal with what I'm calling "partially generated classes". We want to generate methods and members for a class which call other methods on that class added by the implementation.&lt;/p&gt;
 &lt;h2&gt;Potential Solutions&lt;/h2&gt;
