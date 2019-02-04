@@ -85,6 +85,34 @@ pre {
     margin: -1px 0 0 0;
 }
 
+.listing {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+.listing > li {
+    display: flex;
+    justify-content: space-between;
+    width: calc(33% - 20px);
+    margin: 10px;
+    padding: 1px 7px;
+}
+.listing a {
+    color: #333;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+.listing a:after {
+    content: '\\';
+}
+
+.listing .badge {
+    color: #fff;
+    background-color: #999;
+    font-weight: bold;
+    padding: 1px 7px;
+}
+
 .footer {
     text-align: center;
     padding: 2em 0;

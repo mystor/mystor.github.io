@@ -2,9 +2,10 @@
 {% block npath %}<a href="#" class="post-category">tags\</a>{% endblock %}
 
 {% block content %}
-    <ul>
+    <h2>Tag Listing</h2>
+    <ul class="listing">
         {% for tag, articles in tags|sort %}
-            <li><a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a> ({{ articles|count }}) </li>
+            <li><a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }}</a><div class="badge">{{ articles|count }}</div></li>
         {% endfor %}
     </ul>
 {% endblock %}

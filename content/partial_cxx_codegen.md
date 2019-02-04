@@ -1,7 +1,7 @@
 Title: Partially Generated Classes in C++
 Date: 2018-11-24 12:00
 Modified: 2018-11-24 12:00
-Category: Programming
+Category: mozilla
 Tags: mozilla, c++, classes, codegen, oop
 Slug: partial-cxx-codegen
 Authors: Nika Layzell

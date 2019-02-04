@@ -1,7 +1,7 @@
 Title: ClojureScript + Meteor
 Date: 2014-04-27 8:14
 Modified: 2014-04-27 8:14
-Category: Programming
+Category: webdev
 Tags: meteor, clojure, clojurescript, integration
 Slug: clojurescript-meteor
 Authors: Nika Layzell

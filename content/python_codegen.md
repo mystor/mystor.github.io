@@ -1,7 +1,7 @@
 Title: Python Codegen
 Date: 2018-10-22 8:14
 Modified: 2018-10-22 8:14
-Category: Programming
+Category: mozilla
 Tags: python, codegen, mozilla, webidl, xpidl, ipdl
 Slug: python-codegen
 Authors: Nika Layzell

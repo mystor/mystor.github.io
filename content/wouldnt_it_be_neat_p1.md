@@ -1,7 +1,7 @@
 Title: "Wouldn't it be neat if you could write C++ inline in Rust?"
 Date: 2017-03-20 7:17
 Modified: 2017-03-20 7:17
-Category: Programming
+Category: rust
 Tags: rust, rust-cpp, c++, ffi
 Slug: wouldnt-it-be-neat-p1
 Authors: Nika Layzell

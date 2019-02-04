@@ -1,14 +1,18 @@
 Title: Fission Engineering Newsletter #1
-Date: 2018-01-31 3:00pm
-Modified: 2018-01-31 3:00pm
-Category: Programming
+Date: 2018-02-04
+Modified: 2018-02-04
+Category: mozilla
 Tags: mozilla, firefox, gecko, fission
 Slug: fission-news-1
 Authors: Nika Layzell
 Status: draft
 
-A little more than a year ago, a serious security flaw affecting almost all modern
-processors was [publicly disclosed]. Three known variants of the issue
+> **TL;DR** Fission is happening and our first "Milestone" is targeted at
+> the end of February. Please file bugs related to fission and mark them as
+> "Fission Milestone: ?" so we can triage them into the correct milestone.
+
+A little than more a year ago, a serious security flaw affecting almost all
+modern processors was [publicly disclosed]. Three known variants of the issue
 were announced with the names dubbed as [Spectre] (variants 1 and 2) and
 [Meltdown] (variant 3). Spectre abuses a CPU optimization technique known
 as speculative execution to exfiltrate secret data stored in memory of other
@@ -90,7 +94,7 @@ the correct milestone.
 If you have any questions, feel free to reach out to one of us, and we'll get
 you answers, or guide you to someone who can:
 
-* Ron Manning `<rmanning@mozilla.com>` (Fission EPM)
+* Ron Manning `<rmanning@mozilla.com>` (Fission Engineering Project Manager)
 * Nika Layzell `<nika@mozilla.com>` (Fission Tech Lead)
 * Neha Kochar `<nkochar@mozilla.com>` (DOM Fission Engineering Manager)
 
@@ -251,13 +255,6 @@ bi-weekly newsletter schedule.
 
 If you're interested in helping out with the newsletter, please reach out and
 let me (Nika) know!.
-
-
-### TL;DR
-
-Fission is happening and our first "Milestone" is targeted at the end of
-February. Please file bugs related to fission and mark them as "Fission
-Milestone: ?" so we can triage them into the correct milestone.
 
 
 ---

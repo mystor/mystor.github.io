@@ -1,7 +1,7 @@
 Title: So, you want to copy some data?
 Date: 2017-11-28 5:00
 Modified: 2017-11-28 5:00
-Category: Programming
+Category: webdev
 Tags: mozilla, execcommand, web standards, clipboard
 Slug: copying-text
 Authors: Nika Layzell
