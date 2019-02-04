@@ -1,6 +1,6 @@
 Title: Fission Engineering Newsletter #1
-Date: 2018-02-04
-Modified: 2018-02-04
+Date: 2019-02-04
+Modified: 2019-02-04
 Category: mozilla
 Tags: mozilla, firefox, gecko, fission
 Slug: fission-news-1
