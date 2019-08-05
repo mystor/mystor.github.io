@@ -1,11 +1,10 @@
 Title: Introducing git-revise
-Date: 2019-07-27
-Modified: 2019-07-27
+Date: 2019-08-05
+Modified: 2019-08-05
 Category: git
 Tags: git, git-revise, rebase
 Slug: git-revise
 Authors: Nika Layzell
-Status: draft
 
 At Mozilla I often end up building my changes in a patch stack, and used `git
 rebase -i`[^mozilla-hg] to make changes to commits in response to review
@@ -47,26 +46,23 @@ to use re-imagining of the patch stack workflow.
 I would never claim to be a *benchmarking expert* [^benchmark-expert], but
 `git-revise` performs substantially better than rebase for small history editing
 tasks [^system]. In a test applying a single-line change to a `mozilla-central`
-commit 11 patches up the stack I saw a **30x** speed improvement.
+commit 20 patches up the stack I saw a **15x** speed improvement.
 
 ```sh
 $ time bash -c 'git commit --fixup=$TARGET; EDITOR=true git rebase -i --autosquash $TARGET~'
 <snip>
-real    0m16.931s
+real    0m10.733s
 ```
 
 ```sh
 $ time git revise $TARGET
 <snip>
-real    0m0.541s
+real    0m0.685s
 ```
 
 `git-revise` accomplishes this using an in-memory rebase algorithm operating
 directly on git's trees, meaning it never has to touch your index or working
 directory, avoiding expensive disk I/O!
-
-The [performance](https://git-revise.readthedocs.io/en/latest/performance.html)
-doc page has more details.
 
 [^benchmark-expert]: I know my sample size of 1 sucks, though ^_^
 [^system]: On my system, at least. I'm running Fedora 30 on an X1 Carbon (Gen 6)
@@ -105,7 +101,7 @@ diff --git b/file.txt a/file.txt
 Apply this hunk to index [y,n,q,a,d,e,?]?
 ```
 
-Sometimes, a commit needs to be split in two, perhaps because a chance ended up
+Sometimes, a commit needs to be split in two, perhaps because a change ended up
 in the wrong commit. The `--cut` flag (and `cut` interactive command) provides a
 fast way to split a commit in-place.
 
