@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nika's Box, Random stuff in C++ and Rust.">
+
+        <link rel="alternate"  href="https://mystor.github.io/feeds/all.atom.xml" type="application/atom+xml" title="Nika's Box Full Atom Feed"/>
+        <link rel="alternate" href="https://mystor.github.io/feeds/all.rss.xml" type="application/rss+xml" title="Nika's Box Full RSS Feed"/>
+
+        <title>NIKA:\git-revise\></title>
+
+
+    <link rel="stylesheet" href="https://mystor.github.io/theme/css/nika2k.css">
+    <!-- silly twitter stuff 'cause why not -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@kneecaw">
+    <meta name="twitter:title" content="Introducing git-revise">
+    <meta name="twitter:description" content="NIKA:\git-revise\> _">
+
+    <!-- gotta have that nice syntax highlighting~ -->
+    <link rel="stylesheet" href="https://mystor.github.io/theme/css/pygments.css">
+</head>
+
+<body>
+    <div id="layout">
+        <div class="content">
+            <h1 class="content-subhead">
+                <a class="post-category" href="https://mystor.github.io">NIKA:\</a><a href="#" class="post-category">git-revise\</a>>
+                <span class="command">list</span>
+            </h1>
+
+    <section class="post">
+        <header class="post-header">
+            <h1>Introducing git-revise</h1>
+            <p class="post-meta">
+                Mon 05 August 2019 &middot;                     <a class="post-category" href="https://mystor.github.io/tag/git.html">git</a>
+                    <a class="post-category" href="https://mystor.github.io/tag/git-revise.html">git-revise</a>
+                    <a class="post-category" href="https://mystor.github.io/tag/rebase.html">rebase</a>
+            </p>
+        </header>
+    </section>
+    <p>At Mozilla I often end up building my changes in a patch stack, and used <code>git
+rebase -i</code><sup id="fnref:mozilla-hg"><a class="footnote-ref" href="#fn:mozilla-hg" rel="footnote">1</a></sup> to make changes to commits in response to review
+comments etc. Unfortunately, with a repository as large as
+<code>mozilla-central</code><sup id="fnref:mc-files"><a class="footnote-ref" href="#fn:mc-files" rel="footnote">2</a></sup>, <code>git rebase -i</code> has some downsides:</p>
+<ol>
+<li>
+<p>It's <em>slow</em>! Rebase operates directly on the worktree, so it performs a full
+   checkout of each commit in the stack, and frequently refreshes worktree
+   state. On large repositories (especially on NTFS) that can take a long time.</p>
+</li>
+<li>
+<p>It <em>triggers rebuilds</em>! Because rebase touches the file tree, some build
+   systems (like gecko's recursive-make backend) rebuild unnecessarially.</p>
+</li>
+<li>
+<p>It's <em>stateful</em>! If the rebase fails, the repository is in a weird mid-rebase
+   state, and in edge cases I've accidentally dropped commits due to other
+   processes racing on the repository lock.</p>
+</li>
+<li>
+<p>It's <em>clunky</em>! Common tasks (like splitting &amp; rewording commits) require
+   multiple steps and are unintuitive.</p>
+</li>
+</ol>
+<p>Naturally, I did the <strong><em>only</em> reasonable</strong> thing: Build a brand-new tool.</p>
+<table>
+<thead>
+<tr>
+<th align="right"><img alt="xkcd 927 - &quot;Standards&quot;" src="https://mystor.github.io/images/xkcd927.png"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="right"><em>source: <a href="https://xkcd.com/927/">xkcd</a></em></td>
+</tr>
+</tbody>
+</table>
+<h1>Introducing <code>git-revise</code>!</h1>
+<p><code>git-revise</code> is a history editing tool designed for the patch-stack workflow.
+It's fast, non-destructive, and aims to provide a familiar, powerful, and easy
+to use re-imagining of the patch stack workflow.</p>
+<h2>It's <em>fast</em></h2>
+<p>I would never claim to be a <em>benchmarking expert</em> <sup id="fnref:benchmark-expert"><a class="footnote-ref" href="#fn:benchmark-expert" rel="footnote">3</a></sup>, but
+<code>git-revise</code> performs substantially better than rebase for small history editing
+tasks <sup id="fnref:system"><a class="footnote-ref" href="#fn:system" rel="footnote">4</a></sup>. In a test applying a single-line change to a <code>mozilla-central</code>
+commit 20 patches up the stack I saw a <strong>15x</strong> speed improvement.</p>
+<div class="highlight"><pre><span></span>$ <span class="nb">time</span> bash -c <span class="s1">&#39;git commit --fixup=$TARGET; EDITOR=true git rebase -i --autosquash $TARGET~&#39;</span>
+&lt;snip&gt;
+real    0m10.733s
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>$ <span class="nb">time</span> git revise <span class="nv">$TARGET</span>
+&lt;snip&gt;
+real    0m0.685s
+</pre></div>
+
+
+<p><code>git-revise</code> accomplishes this using an in-memory rebase algorithm operating
+directly on git's trees, meaning it never has to touch your index or working
+directory, avoiding expensive disk I/O!</p>
+<h2>It's <em>handy</em></h2>
+<p><code>git-revise</code> isn't just a faster <code>git rebase -i</code>, it provides helpful commands,
+flags, and tools which make common changes faster, and easier:</p>
+<h3>Fixup Fast</h3>
+<div class="highlight"><pre><span></span>$ git add .
+$ git revise HEAD~~
+</pre></div>
+
+
+<p>Running <code>git revise $COMMIT</code> directly collects changes staged in the index, and
+directly applies them to the specified commit. Conflicts are resolved
+interactively, and a warning will be shown if the final state of the tree is
+different from what you started with!</p>
+<p>With an extra <code>-e</code>, you can update the commit message at the same time, and <code>-a</code>
+will stage your changes, so you don't have to! <sup id="fnref:revise-all"><a class="footnote-ref" href="#fn:revise-all" rel="footnote">5</a></sup></p>
+<h3>Split Commits</h3>
+<div class="highlight"><pre><span></span>$ git revise -c <span class="nv">$COMMIT</span>
+Select changes to be included in part <span class="o">[</span><span class="m">1</span><span class="o">]</span>:
+diff --git b/file.txt a/file.txt
+&lt;snip&gt;
+
+Apply this hunk to index <span class="o">[</span>y,n,q,a,d,e,?<span class="o">]</span>?
+</pre></div>
+
+
+<p>Sometimes, a commit needs to be split in two, perhaps because a change ended up
+in the wrong commit. The <code>--cut</code> flag (and <code>cut</code> interactive command) provides a
+fast way to split a commit in-place.</p>
+<p>Running <code>git revise --cut $COMMIT</code> will start a <code>git add -p</code>-style hunk
+selector, allowing you to pick changes for part 1, and the rest will end up in
+part 2.</p>
+<p>No more tinkering around with <code>edit</code> during a rebase to split off that comment
+you accidentally added to the wrong commit!</p>
+<h3>Interactive Mode</h3>
+<div class="highlight"><pre><span></span>$ git revise -i
+</pre></div>
+
+
+<p><code>git-revise</code> has a <code>git rebase -i</code>-style interactive mode, but with some
+quality-of-life improvements, on top of being fast:</p>
+<h4>Implicit Base Commit</h4>
+<p>If a base commit isn't provided, <code>--interactive</code> will implicitly locate a safe
+base commit to start from, walking up from <code>HEAD</code>, and stopping at published &amp;
+merge commits. Often <code>git revise -i</code> is all you need!</p>
+<h4>The <code>index</code> Todo</h4>
+<p>Staged changes in the index automatically appear in interactive mode, and can be
+moved around and treated like any other commit in range. No need to turn it into
+a commit with a dummy name before you pop open interactive mode &amp; squash it into
+another commit!</p>
+<h3>Bulk Commit Rewording</h3>
+<div class="highlight"><pre><span></span>$ git revise -ie
+</pre></div>
+
+
+<p>Ever wanted to update a bunch of commit messages at once? Perhaps they're all
+missing the bug number? Well, <code>git revise -ie</code> has you covered. It'll open a
+special Interactive Mode where each command is prefixed with a <code>++</code>, and the
+full commit message is present after it.</p>
+<p>Changes made to these commit messages will be applied before executing the
+TODOs, meaning you can edit them in bulk. I use this <em>constantly</em> to add bug
+numbers, elaborate on commit details, and add reviewer information to commit
+messages.</p>
+<div class="highlight"><pre><span></span>++ pick f5a02a16731a
+Bug ??? - My commit summary, r=?
+
+The full commit message body follows!
+
+++ pick fef1aeddd6fb
+Bug ??? - Another commit, r=?
+
+Another commit&#39;s body!
+</pre></div>
+
+
+<h3>Autosquash Support</h3>
+<div class="highlight"><pre><span></span>$ git rebase --autosquash
+</pre></div>
+
+
+<p>If you're used to <code>git rebase -i --autosquash</code>, revise works with you. Running
+<code>git revise --autosquash</code> will automatically reorder and apply fixup commits
+created with <code>git commit --fixup=$COMMIT</code> and similar tools, and thanks to the
+implicit base commit, you don't even need to specify it.</p>
+<p>You can even pass the <code>-i</code> flag if you want to edit the generated todo list
+before running it.</p>
+<h2>It's <em>non-destructive</em></h2>
+<p><code>git-revise</code> doesn't touch either your working directory, or your index. This
+means that if it's killed while running, your repository won't be changed, and
+you can't end up in a mid-rebase state while using it.</p>
+<p>Problems like conflicts are resolved interactively, while the command is
+running, without changing the actual files you've been working on. And, as no
+files are touched, <code>git-revise</code> won't trigger any unnecessary rebuilds!</p>
+<h1>Interested?</h1>
+<p><strong><em>Awesome!</em></strong></p>
+<p><code>git-revise</code> is a MIT-licensed pure-Python 3.6+ package, and can be installed
+with <code>pip</code>:</p>
+<div class="highlight"><pre><span></span>$ python3 -m pip install --user git-revise
+</pre></div>
+
+
+<p>You can also check out the source on
+<a href="https://github.com/mystor/git-revise">GitHub</a>, and read the
+<a href="https://git-revise.readthedocs.io/en/latest/man.html">manpage</a> online, or by
+running <code>man git revise</code> in your terminal.</p>
+<p>I'll leave you with some handy links to resources to learn more about
+<code>git-revise</code>, how it works, and how you can contribute!</p>
+<ul>
+<li>Repository: <a href="https://github.com/mystor/git-revise">https://github.com/mystor/git-revise</a></li>
+<li>Bug Tracker: <a href="https://github.com/mystor/git-revise/issues">https://github.com/mystor/git-revise/issues</a></li>
+<li>Manpage: <a href="https://git-revise.readthedocs.io/en/latest/man.html">https://git-revise.readthedocs.io/en/latest/man.html</a></li>
+<li>Installing: <a href="https://git-revise.readthedocs.io/en/latest/install.html">https://git-revise.readthedocs.io/en/latest/install.html</a></li>
+<li>Contributing: <a href="https://git-revise.readthedocs.io/en/latest/contributing.html">https://git-revise.readthedocs.io/en/latest/contributing.html</a></li>
+</ul>
+<div class="footnote">
+<hr>
+<ol>
+<li id="fn:mozilla-hg">
+<p>I use <code>git</code> with <code>git cinnabar</code>, as I'm more comfortable with it,
+despite the official repos being mercurial.&#160;<a class="footnote-backref" href="#fnref:mozilla-hg" rev="footnote" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:mc-files">
+<p>280268 files, according to <code>git ls-files | wc -l</code>.&#160;<a class="footnote-backref" href="#fnref:mc-files" rev="footnote" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:benchmark-expert">
+<p>I know my sample size of 1 sucks, though ^_^&#160;<a class="footnote-backref" href="#fnref:benchmark-expert" rev="footnote" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:system">
+<p>On my system, at least. I'm running Fedora 30 on an X1 Carbon (Gen 6)&#160;<a class="footnote-backref" href="#fnref:system" rev="footnote" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:revise-all">
+<p>The <code>-a</code> (or <code>--all</code>) flag will impact the index (due to files
+being staged), unlike other commands.&#160;<a class="footnote-backref" href="#fnref:revise-all" rev="footnote" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+
+<footer class="footer">
+    <h1 class="content-subhead">About Nika</h1>
+    <p>
+        <strong>Nika Layzell</strong> is a platform engineer working on Gecko, the engine powering
+        <a href="https://firefox.com/">Firefox</a>.<br> In her spare time, she
+        makes a fool of herself on the internet, and breaks otherwise functional
+        software.
+    </p>
+    <p>
+        <a href="https://github.com/mystor/">github\</a> &middot;
+        <a href="https://twitter.com/kneecaw/">twitter\</a> &middot;
+        <a href="https://mystor.github.io/archives.html">archives\</a> &middot;
+        <a href="https://mystor.github.io/categories.html">categories\</a> &middot;
+        <a href="https://mystor.github.io/tags.html">tags\</a> &middot;
+        <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>
+    </p>
+</footer>        </div>
+    </div>
+</body>
+</html>

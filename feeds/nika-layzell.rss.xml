@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>Nika's Box - Nika Layzell</title><link>https://mystor.github.io/</link><description></description><lastBuildDate>Mon, 04 Feb 2019 13:45:00 -0500</lastBuildDate><item><title>Fission Engineering Newsletter #1</title><link>https://mystor.github.io/fission-news-1.html</link><description>&lt;blockquote&gt;
+<rss version="2.0"><channel><title>Nika's Box - Nika Layzell</title><link>https://mystor.github.io/</link><description></description><lastBuildDate>Mon, 05 Aug 2019 00:00:00 -0400</lastBuildDate><item><title>Introducing git-revise</title><link>https://mystor.github.io/git-revise.html</link><description>&lt;p&gt;At Mozilla I often end up building my changes in a patch stack, and used &lt;code&gt;git
+rebase -i&lt;/code&gt;&lt;sup id="fnref:mozilla-hg"&gt;&lt;a class="footnote-ref" href="#fn:mozilla-hg" rel="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt; to make changes to commits in response to review
+comments etc. Unfortunately, with a repository as large as
+&lt;code&gt;mozilla-central&lt;/code&gt;&lt;sup id="fnref:mc-files"&gt;&lt;a class="footnote-ref" href="#fn:mc-files" rel="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;, &lt;code&gt;git rebase -i&lt;/code&gt; has some downsides:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;It's &lt;em&gt;slow&lt;/em&gt;! Rebase operates directly …&lt;/p&gt;&lt;/li&gt;&lt;/ol&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Nika Layzell</dc:creator><pubDate>Mon, 05 Aug 2019 00:00:00 -0400</pubDate><guid isPermaLink="false">tag:mystor.github.io,2019-08-05:/git-revise.html</guid><category>git</category><category>git-revise</category><category>rebase</category></item><item><title>Fission Engineering Newsletter #1</title><link>https://mystor.github.io/fission-news-1.html</link><description>&lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;TL;DR&lt;/strong&gt; Fission is happening and our first "Milestone" is targeted at
 the end of February. Please file bugs related to fission and mark them as
 "Fission Milestone: ?" so we can triage them into the correct milestone.&lt;/p&gt;

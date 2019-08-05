@@ -8,7 +8,7 @@
         <link rel="alternate"  href="https://mystor.github.io/feeds/all.atom.xml" type="application/atom+xml" title="Nika's Box Full Atom Feed"/>
         <link rel="alternate" href="https://mystor.github.io/feeds/all.rss.xml" type="application/rss+xml" title="Nika's Box Full RSS Feed"/>
 
-        <title>NIKA:\categories\></title>
+        <title>NIKA:\t\rebase></title>
 
 
     <link rel="stylesheet" href="https://mystor.github.io/theme/css/nika2k.css">
@@ -18,17 +18,31 @@
     <div id="layout">
         <div class="content">
             <h1 class="content-subhead">
-                <a class="post-category" href="https://mystor.github.io">NIKA:\</a><a href="#" class="post-category">categories\</a>>
+                <a class="post-category" href="https://mystor.github.io">NIKA:\</a><!--
+    --><a href="https://mystor.github.io/tags.html" class="post-category">t\</a><!--
+    --><a href="#" class="post-category">rebase</a><!--
+-->>
                 <span class="command">list</span>
             </h1>
 
-    <h2>Category Listing</h2>
-    <ul class="listing">
-            <li><a href="https://mystor.github.io/category/git.html">git</a><div class="badge">1</div></li>
-            <li><a href="https://mystor.github.io/category/mozilla.html">mozilla</a><div class="badge">3</div></li>
-            <li><a href="https://mystor.github.io/category/rust.html">rust</a><div class="badge">1</div></li>
-            <li><a href="https://mystor.github.io/category/webdev.html">webdev</a><div class="badge">1</div></li>
-    </ul>
+    <!-- A wrapper for all the blog posts -->
+    <div class="posts">
+            <section class="post">
+                <header class="post-header">
+                    <h3><a class="post-title" href="https://mystor.github.io/git-revise.html">Introducing git-revise</a></h3>
+                    <p class="post-meta"><p>At Mozilla I often end up building my changes in a patch stack, and used <code>git
+rebase -i</code><sup id="fnref:mozilla-hg"><a class="footnote-ref" href="#fn:mozilla-hg" rel="footnote">1</a></sup> to make changes to commits in response to review
+comments etc. Unfortunately, with a repository as large as
+<code>mozilla-central</code><sup id="fnref:mc-files"><a class="footnote-ref" href="#fn:mc-files" rel="footnote">2</a></sup>, <code>git rebase -i</code> has some downsides:</p>
+<ol>
+<li>
+<p>It's <em>slow</em>! Rebase operates directly …</p></li></ol></p>
+                    <p class="post-meta">
+                        in <a href="https://mystor.github.io/category/git.html">git</a> &middot; Mon 05 August 2019
+                    </p>
+                </header>
+            </section>
+    </div>
 
 <footer class="footer">
     <h1 class="content-subhead">About Nika</h1>
