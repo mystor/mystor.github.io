@@ -6,6 +6,8 @@ Tags: git, git-revise, rebase
 Slug: git-revise
 Authors: Nika Layzell
 
+> *(Aug. 6, 2019): Added the "What `git-revise` is not" section.*
+
 At Mozilla I often end up building my changes in a patch stack, and used `git
 rebase -i`[^mozilla-hg] to make changes to commits in response to review
 comments etc. Unfortunately, with a repository as large as
@@ -185,6 +187,48 @@ you can't end up in a mid-rebase state while using it.
 Problems like conflicts are resolved interactively, while the command is
 running, without changing the actual files you've been working on. And, as no
 files are touched, `git-revise` won't trigger any unnecessary rebuilds!
+
+# What `git-revise` is not
+
+_(Section Added: Aug. 6, 2019)_
+
+`git-revise` _does not_ aim to be a complete replacement for `git rebase -i`. It
+has a specific use-case in mind, namely incremental changes to a patch stack,
+and excludes features which `rebase` supports.
+
+In my personal workflow, I still reach for `git rebase [-i]` when I need to
+rebase my local commits due to new upstream changes, and I imagine there are
+people with advanced workflows who cannot use `git revise`.
+
+**Working directory changes:**
+
+`git-revise` does not modify your working directory or index while it's running.
+This is part of what allows it to be so fast. However, it also means that
+certain rebase features, such as the `edit` interactive command, are not
+possible.
+
+This also is why `git revise -i` does not support removing commits from within a
+patch series: doing so would require changing the state of your working
+directory due to the now-missing commit. If you want to drop a commit you can
+instead move it to the end of the list and mark it as `index`. The commit will
+disappear from history, but your index and working directory won't be changed. A
+quick `git reset --hard HEAD` will update your index and working directory.
+
+These restrictions _may_ change in the future. Features like this have been
+requested, and it might be useful to allow opting-in to dropping commits on the
+floor or pausing mid-revise.
+
+**Merging through renames & copies:**
+
+`git-revise` uses a custom merge backend, which doesn't attempt to handle
+file renames or copies. For changes which need to be merged or rebased
+through file renames and copies, `git rebase` is a better option.
+
+**Complex history rewriting:**
+
+`git rebase` supports rebasing complex commits, such as merges. In contrast,
+`git-revise` does not currently aim to support these more advanced features of
+`git rebase`.
 
 # Interested?
 
