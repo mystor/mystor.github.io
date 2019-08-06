@@ -165,7 +165,7 @@ Another commit's body!
 ### Autosquash Support
 
 ```sh
-$ git rebase --autosquash
+$ git revise --autosquash
 ```
 
 If you're used to `git rebase -i --autosquash`, revise works with you. Running
