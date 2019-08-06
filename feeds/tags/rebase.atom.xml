@@ -141,7 +141,7 @@ Another commit&amp;#39;s body!
 
 
 &lt;h3&gt;Autosquash Support&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ git rebase --autosquash
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ git revise --autosquash
 &lt;/pre&gt;&lt;/div&gt;
 
 
