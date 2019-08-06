@@ -40,7 +40,10 @@
             </p>
         </header>
     </section>
-    <p>At Mozilla I often end up building my changes in a patch stack, and used <code>git
+    <blockquote>
+<p><em>(Aug. 6, 2019): Added the "What <code>git-revise</code> is not" section.</em></p>
+</blockquote>
+<p>At Mozilla I often end up building my changes in a patch stack, and used <code>git
 rebase -i</code><sup id="fnref:mozilla-hg"><a class="footnote-ref" href="#fn:mozilla-hg" rel="footnote">1</a></sup> to make changes to commits in response to review
 comments etc. Unfortunately, with a repository as large as
 <code>mozilla-central</code><sup id="fnref:mc-files"><a class="footnote-ref" href="#fn:mc-files" rel="footnote">2</a></sup>, <code>git rebase -i</code> has some downsides:</p>
@@ -193,6 +196,36 @@ you can't end up in a mid-rebase state while using it.</p>
 <p>Problems like conflicts are resolved interactively, while the command is
 running, without changing the actual files you've been working on. And, as no
 files are touched, <code>git-revise</code> won't trigger any unnecessary rebuilds!</p>
+<h1>What <code>git-revise</code> is not</h1>
+<p><em>(Section Added: Aug. 6, 2019)</em></p>
+<p><code>git-revise</code> <em>does not</em> aim to be a complete replacement for <code>git rebase -i</code>. It
+has a specific use-case in mind, namely incremental changes to a patch stack,
+and excludes features which <code>rebase</code> supports.</p>
+<p>In my personal workflow, I still reach for <code>git rebase [-i]</code> when I need to
+rebase my local commits due to new upstream changes, and I imagine there are
+people with advanced workflows who cannot use <code>git revise</code>.</p>
+<p><strong>Working directory changes:</strong></p>
+<p><code>git-revise</code> does not modify your working directory or index while it's running.
+This is part of what allows it to be so fast. However, it also means that
+certain rebase features, such as the <code>edit</code> interactive command, are not
+possible.</p>
+<p>This also is why <code>git revise -i</code> does not support removing commits from within a
+patch series: doing so would require changing the state of your working
+directory due to the now-missing commit. If you want to drop a commit you can
+instead move it to the end of the list and mark it as <code>index</code>. The commit will
+disappear from history, but your index and working directory won't be changed. A
+quick <code>git reset --hard HEAD</code> will update your index and working directory.</p>
+<p>These restrictions <em>may</em> change in the future. Features like this have been
+requested, and it might be useful to allow opting-in to dropping commits on the
+floor or pausing mid-revise.</p>
+<p><strong>Merging through renames &amp; copies:</strong></p>
+<p><code>git-revise</code> uses a custom merge backend, which doesn't attempt to handle
+file renames or copies. For changes which need to be merged or rebased
+through file renames and copies, <code>git rebase</code> is a better option.</p>
+<p><strong>Complex history rewriting:</strong></p>
+<p><code>git rebase</code> supports rebasing complex commits, such as merges. In contrast,
+<code>git-revise</code> does not currently aim to support these more advanced features of
+<code>git rebase</code>.</p>
 <h1>Interested?</h1>
 <p><strong><em>Awesome!</em></strong></p>
 <p><code>git-revise</code> is a MIT-licensed pure-Python 3.6+ package, and can be installed

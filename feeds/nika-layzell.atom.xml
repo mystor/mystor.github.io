@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Nika's Box - Nika Layzell</title><link href="https://mystor.github.io/" rel="alternate"></link><link href="https://mystor.github.io/feeds/nika-layzell.atom.xml" rel="self"></link><id>https://mystor.github.io/</id><updated>2019-08-05T00:00:00-04:00</updated><entry><title>Introducing git-revise</title><link href="https://mystor.github.io/git-revise.html" rel="alternate"></link><published>2019-08-05T00:00:00-04:00</published><updated>2019-08-05T00:00:00-04:00</updated><author><name>Nika Layzell</name></author><id>tag:mystor.github.io,2019-08-05:/git-revise.html</id><summary type="html">&lt;p&gt;At Mozilla I often end up building my changes in a patch stack, and used &lt;code&gt;git
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Nika's Box - Nika Layzell</title><link href="https://mystor.github.io/" rel="alternate"></link><link href="https://mystor.github.io/feeds/nika-layzell.atom.xml" rel="self"></link><id>https://mystor.github.io/</id><updated>2019-08-05T00:00:00-04:00</updated><entry><title>Introducing git-revise</title><link href="https://mystor.github.io/git-revise.html" rel="alternate"></link><published>2019-08-05T00:00:00-04:00</published><updated>2019-08-05T00:00:00-04:00</updated><author><name>Nika Layzell</name></author><id>tag:mystor.github.io,2019-08-05:/git-revise.html</id><summary type="html">&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;(Aug. 6, 2019): Added the "What &lt;code&gt;git-revise&lt;/code&gt; is not" section.&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;At Mozilla I often end up building my changes in a patch stack, and used &lt;code&gt;git
 rebase -i&lt;/code&gt;&lt;sup id="fnref:mozilla-hg"&gt;&lt;a class="footnote-ref" href="#fn:mozilla-hg" rel="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt; to make changes to commits in response to review
 comments etc. Unfortunately, with a repository as large as
-&lt;code&gt;mozilla-central&lt;/code&gt;&lt;sup id="fnref:mc-files"&gt;&lt;a class="footnote-ref" href="#fn:mc-files" rel="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;, &lt;code&gt;git rebase -i&lt;/code&gt; has some downsides:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;It's &lt;em&gt;slow&lt;/em&gt;! Rebase operates directly …&lt;/p&gt;&lt;/li&gt;&lt;/ol&gt;</summary><content type="html">&lt;p&gt;At Mozilla I often end up building my changes in a patch stack, and used &lt;code&gt;git
+&lt;code&gt;mozilla-central&lt;/code&gt;&lt;sup id="fnref:mc-files"&gt;&lt;a class="footnote-ref" href="#fn:mc-files" rel="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;, &lt;code&gt;git …&lt;/code&gt;&lt;/p&gt;</summary><content type="html">&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;(Aug. 6, 2019): Added the "What &lt;code&gt;git-revise&lt;/code&gt; is not" section.&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;At Mozilla I often end up building my changes in a patch stack, and used &lt;code&gt;git
 rebase -i&lt;/code&gt;&lt;sup id="fnref:mozilla-hg"&gt;&lt;a class="footnote-ref" href="#fn:mozilla-hg" rel="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt; to make changes to commits in response to review
 comments etc. Unfortunately, with a repository as large as
 &lt;code&gt;mozilla-central&lt;/code&gt;&lt;sup id="fnref:mc-files"&gt;&lt;a class="footnote-ref" href="#fn:mc-files" rel="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;, &lt;code&gt;git rebase -i&lt;/code&gt; has some downsides:&lt;/p&gt;
@@ -158,6 +161,36 @@ you can't end up in a mid-rebase state while using it.&lt;/p&gt;
 &lt;p&gt;Problems like conflicts are resolved interactively, while the command is
 running, without changing the actual files you've been working on. And, as no
 files are touched, &lt;code&gt;git-revise&lt;/code&gt; won't trigger any unnecessary rebuilds!&lt;/p&gt;
+&lt;h1&gt;What &lt;code&gt;git-revise&lt;/code&gt; is not&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;(Section Added: Aug. 6, 2019)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git-revise&lt;/code&gt; &lt;em&gt;does not&lt;/em&gt; aim to be a complete replacement for &lt;code&gt;git rebase -i&lt;/code&gt;. It
+has a specific use-case in mind, namely incremental changes to a patch stack,
+and excludes features which &lt;code&gt;rebase&lt;/code&gt; supports.&lt;/p&gt;
+&lt;p&gt;In my personal workflow, I still reach for &lt;code&gt;git rebase [-i]&lt;/code&gt; when I need to
+rebase my local commits due to new upstream changes, and I imagine there are
+people with advanced workflows who cannot use &lt;code&gt;git revise&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Working directory changes:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git-revise&lt;/code&gt; does not modify your working directory or index while it's running.
+This is part of what allows it to be so fast. However, it also means that
+certain rebase features, such as the &lt;code&gt;edit&lt;/code&gt; interactive command, are not
+possible.&lt;/p&gt;
+&lt;p&gt;This also is why &lt;code&gt;git revise -i&lt;/code&gt; does not support removing commits from within a
+patch series: doing so would require changing the state of your working
+directory due to the now-missing commit. If you want to drop a commit you can
+instead move it to the end of the list and mark it as &lt;code&gt;index&lt;/code&gt;. The commit will
+disappear from history, but your index and working directory won't be changed. A
+quick &lt;code&gt;git reset --hard HEAD&lt;/code&gt; will update your index and working directory.&lt;/p&gt;
+&lt;p&gt;These restrictions &lt;em&gt;may&lt;/em&gt; change in the future. Features like this have been
+requested, and it might be useful to allow opting-in to dropping commits on the
+floor or pausing mid-revise.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Merging through renames &amp;amp; copies:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git-revise&lt;/code&gt; uses a custom merge backend, which doesn't attempt to handle
+file renames or copies. For changes which need to be merged or rebased
+through file renames and copies, &lt;code&gt;git rebase&lt;/code&gt; is a better option.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Complex history rewriting:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git rebase&lt;/code&gt; supports rebasing complex commits, such as merges. In contrast,
+&lt;code&gt;git-revise&lt;/code&gt; does not currently aim to support these more advanced features of
+&lt;code&gt;git rebase&lt;/code&gt;.&lt;/p&gt;
 &lt;h1&gt;Interested?&lt;/h1&gt;
 &lt;p&gt;&lt;strong&gt;&lt;em&gt;Awesome!&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;git-revise&lt;/code&gt; is a MIT-licensed pure-Python 3.6+ package, and can be installed
